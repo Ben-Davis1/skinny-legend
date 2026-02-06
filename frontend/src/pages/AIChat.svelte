@@ -161,6 +161,45 @@
     }
   }
 
+  async function addAllItems(items) {
+    if (!currentLog || !items || items.length === 0) {
+      error = 'Could not load daily log or no items to add';
+      return;
+    }
+
+    try {
+      let successCount = 0;
+
+      for (const item of items) {
+        const aiNotes = `AI Chat Assistant - Natural language food entry (Auto-detected: ${item.meal_type || 'snack'})`;
+
+        await foodEntries.create({
+          daily_log_id: currentLog.id,
+          name: item.name,
+          calories: item.calories,
+          protein_g: item.protein_g || 0,
+          carbs_g: item.carbs_g || 0,
+          fat_g: item.fat_g || 0,
+          fiber_g: item.fiber_g || 0,
+          sugar_g: item.sugar_g || 0,
+          serving_size: item.serving_size || '1 serving',
+          meal_type: item.meal_type || 'snack',
+          ai_notes: aiNotes
+        });
+        successCount++;
+      }
+
+      messages.push({
+        role: 'assistant',
+        content: `Added all ${successCount} items to your log!`,
+        timestamp: new Date()
+      });
+      messages = messages;
+    } catch (err) {
+      error = `Failed to add items: ${err.message}`;
+    }
+  }
+
   function handleKeydown(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
@@ -185,6 +224,11 @@
 
             {#if message.items}
               <div class="food-items">
+                {#if message.items.length > 1}
+                  <button class="primary add-all-btn" on:click={() => addAllItems(message.items)}>
+                    ➕ Add All ({message.items.length} items)
+                  </button>
+                {/if}
                 {#each message.items as item (item.name + item.calories)}
                   <div class="food-item">
                     <div class="item-details">
@@ -302,6 +346,18 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .add-all-btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    background: var(--secondary);
+    font-weight: 600;
+    padding: 0.75rem;
+  }
+
+  .add-all-btn:hover {
+    background: #F57C00;
   }
 
   .food-item {
