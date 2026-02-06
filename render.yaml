@@ -1,0 +1,34 @@
+services:
+  # Backend API
+  - type: web
+    name: skinny-legend-api
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && bash start.sh
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://skinny-legend.onrender.com
+      - key: DATABASE_PATH
+        value: /opt/render/project/src/backend/skinny_legend.db
+      - key: UPLOAD_DIR
+        value: /opt/render/project/src/backend/uploads
+    autoDeploy: true
+
+  # Frontend
+  - type: web
+    name: skinny-legend
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm run preview -- --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: VITE_API_URL
+        value: https://skinny-legend-api.onrender.com
+    autoDeploy: true
