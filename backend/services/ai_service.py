@@ -255,7 +255,7 @@ Remember: ONLY JSON, no explanations."""
 
         # Call Claude (using Sonnet for better instruction following)
         message = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-5-sonnet-20240620",
             max_tokens=2048,
             messages=messages
         )
