@@ -10,7 +10,8 @@ export default defineConfig({
   preview: {
     host: true,
     port: 4173,
-    strictPort: false
+    strictPort: false,
+    allowedHosts: ['skinny-legend.onrender.com', '.onrender.com']
   },
   build: {
     outDir: 'dist'
