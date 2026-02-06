@@ -8,6 +8,7 @@
   import RecentFoods from '../components/RecentFoods.svelte';
   import ExerciseLogger from '../components/ExerciseLogger.svelte';
   import SupplementLogger from '../components/SupplementLogger.svelte';
+  import RecentSupplements from '../components/RecentSupplements.svelte';
 
   let currentDate;
   selectedDate.subscribe(value => {
@@ -285,6 +286,11 @@
         />
 
         <SupplementLogger
+          dailyLogId={dailyLog.id}
+          on:update={loadTodayLog}
+        />
+
+        <RecentSupplements
           dailyLogId={dailyLog.id}
           on:update={loadTodayLog}
         />

@@ -13,6 +13,21 @@ def get_supplements(daily_log_id):
     )
     return jsonify(supplements)
 
+@bp.route('/recent', methods=['GET'])
+def get_recent_supplements():
+    """Get recently used supplements (last 30 days, unique by name)"""
+    user_id = request.args.get('user_id', 1)
+
+    supplements = query_db(
+        '''SELECT s.* FROM supplements s
+           JOIN daily_logs dl ON s.daily_log_id = dl.id
+           WHERE dl.user_id = ? AND dl.date >= date('now', '-30 days')
+           ORDER BY s.created_at DESC
+           LIMIT 50''',
+        [user_id]
+    )
+    return jsonify(supplements)
+
 @bp.route('', methods=['POST'])
 def create_supplement():
     """Create a new supplement entry"""

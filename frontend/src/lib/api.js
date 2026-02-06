@@ -159,6 +159,7 @@ export const exercises = {
 // Supplements API
 export const supplements = {
     getByLog: (dailyLogId) => request(`/api/supplements/${dailyLogId}`),
+    getRecent: (userId = 1) => request(`/api/supplements/recent?user_id=${userId}`),
     create: (data) => request('/api/supplements', { method: 'POST', body: JSON.stringify(data) }),
     update: (id, data) => request(`/api/supplements/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id) => request(`/api/supplements/${id}`, { method: 'DELETE' })

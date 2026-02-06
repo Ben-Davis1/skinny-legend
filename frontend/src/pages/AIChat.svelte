@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { ai, foodEntries, dailyLogs, exercises } from '../lib/api.js';
+  import { ai, foodEntries, dailyLogs, exercises, supplements } from '../lib/api.js';
   import { selectedDate } from '../lib/stores.js';
 
   let messages = [];
@@ -54,13 +54,16 @@
         { role: 'assistant', content: JSON.stringify(response) }
       );
 
-      // Handle actions (water and exercise)
+      // Handle actions (water, exercise, and supplements)
       if (response.actions) {
         if (response.actions.water_ml && response.actions.water_ml > 0) {
           await updateWater(response.actions.water_ml);
         }
         if (response.actions.exercise && response.actions.exercise.type && response.actions.exercise.duration_minutes > 0) {
           await addExercise(response.actions.exercise);
+        }
+        if (response.actions.supplements && response.actions.supplements.length > 0) {
+          await addSupplements(response.actions.supplements);
         }
       }
 
@@ -127,6 +130,25 @@
       });
     } catch (err) {
       console.error('Failed to add exercise:', err);
+    }
+  }
+
+  async function addSupplements(supplementsList) {
+    if (!currentLog || !supplementsList || supplementsList.length === 0) return;
+
+    try {
+      for (const supp of supplementsList) {
+        await supplements.create({
+          daily_log_id: currentLog.id,
+          name: supp.name,
+          dosage: supp.dosage || '',
+          type: supp.type || 'supplement',
+          time_taken: new Date().toTimeString().split(' ')[0].substring(0, 5),
+          notes: supp.notes || 'Logged via AI Chat'
+        });
+      }
+    } catch (err) {
+      console.error('Failed to add supplements:', err);
     }
   }
 

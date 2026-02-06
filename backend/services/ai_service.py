@@ -203,7 +203,10 @@ Response format - YOU MUST USE EXACTLY THIS STRUCTURE:
     ],
     "actions": {
         "water_ml": 0,
-        "exercise": {"type": "", "duration_minutes": 0, "notes": ""}
+        "exercise": {"type": "", "duration_minutes": 0, "notes": ""},
+        "supplements": [
+            {"name": "Vitamin D", "dosage": "5000 IU", "type": "vitamin", "notes": "Morning supplement"}
+        ]
     },
     "needs_clarification": false,
     "message": "I found 2 slices of shokopan toast with Flora butter from your breakfast. Would you like to add this?"
@@ -238,16 +241,28 @@ Response:
         {"name": "Chicken Breast", "serving_size": "200g", "calories": 330, "protein_g": 62, "carbs_g": 0, "fat_g": 7, "fiber_g": 0, "sugar_g": 0, "meal_type": "lunch", "reasoning": "Skinless chicken breast is ~165 cal per 100g, so 200g = 330 cal"},
         {"name": "Mixed Salad", "serving_size": "1 bowl", "calories": 50, "protein_g": 2, "carbs_g": 8, "fat_g": 1, "fiber_g": 3, "sugar_g": 4, "meal_type": "lunch", "reasoning": "Standard mixed salad with lettuce, tomatoes, cucumber = ~50 cal"}
     ],
-    "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}},
+    "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}, "supplements": []},
     "needs_clarification": false,
     "message": "I found chicken breast and salad from your lunch. Ready to add?"
 }
 
-Remember: ONLY JSON, no explanations."""
+User: "Took my vitamin D 5000 IU and omega-3 this morning"
+Response:
+{
+    "items": [],
+    "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}, "supplements": [
+        {"name": "Vitamin D", "dosage": "5000 IU", "type": "vitamin", "notes": "Morning supplement"},
+        {"name": "Omega-3", "dosage": "1 capsule", "type": "supplement", "notes": "Morning supplement"}
+    ]},
+    "needs_clarification": false,
+    "message": "I logged Vitamin D and Omega-3 supplements for you!"
+}
+
+Remember: ONLY JSON, no explanations. Extract supplements/vitamins/medications when mentioned."""
             })
             messages.append({
                 "role": "assistant",
-                "content": '{"items": [], "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}}, "needs_clarification": false, "message": "I understand. I will respond with only JSON format."}'
+                "content": '{"items": [], "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}, "supplements": []}, "needs_clarification": false, "message": "I understand. I will respond with only JSON format."}'
             })
 
         # Add user message
