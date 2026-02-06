@@ -253,9 +253,9 @@ Remember: ONLY JSON, no explanations."""
             "content": user_message
         })
 
-        # Call Claude (using Haiku - only model available on this API key)
+        # Call Claude (using Sonnet 4.5 for better instruction following)
         message = client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model="claude-sonnet-4-5-20250929",
             max_tokens=2048,
             temperature=0,  # More deterministic for JSON output
             messages=messages
