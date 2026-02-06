@@ -192,6 +192,12 @@
     if (percentage >= 90) return 'near-goal';
     return '';
   }
+
+  function getMacroColorClass(current, target) {
+    if (!target) return '';
+    if (current > target) return 'over-target';
+    return '';
+  }
 </script>
 
 <div class="container">
@@ -272,15 +278,21 @@
           </div>
           <div class="stat">
             <span class="stat-label">Protein</span>
-            <span class="stat-value">{Math.round(totalMacros.protein)}g</span>
+            <span class="stat-value {getMacroColorClass(totalMacros.protein, dailyLog.protein_target_g)}">
+              {Math.round(totalMacros.protein)}{dailyLog.protein_target_g ? ` / ${Math.round(dailyLog.protein_target_g)}` : ''}g
+            </span>
           </div>
           <div class="stat">
             <span class="stat-label">Carbs</span>
-            <span class="stat-value">{Math.round(totalMacros.carbs)}g</span>
+            <span class="stat-value {getMacroColorClass(totalMacros.carbs, dailyLog.carbs_target_g)}">
+              {Math.round(totalMacros.carbs)}{dailyLog.carbs_target_g ? ` / ${Math.round(dailyLog.carbs_target_g)}` : ''}g
+            </span>
           </div>
           <div class="stat">
             <span class="stat-label">Fat</span>
-            <span class="stat-value">{Math.round(totalMacros.fat)}g</span>
+            <span class="stat-value {getMacroColorClass(totalMacros.fat, dailyLog.fat_target_g)}">
+              {Math.round(totalMacros.fat)}{dailyLog.fat_target_g ? ` / ${Math.round(dailyLog.fat_target_g)}` : ''}g
+            </span>
           </div>
         </div>
 
@@ -413,7 +425,8 @@
     color: #FF9800; /* Orange */
   }
 
-  .stat-value.over-goal {
+  .stat-value.over-goal,
+  .stat-value.over-target {
     color: #F44336; /* Red */
   }
 
