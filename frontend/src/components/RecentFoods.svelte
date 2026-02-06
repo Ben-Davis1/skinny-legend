@@ -58,8 +58,8 @@
   {:else if foods.length === 0}
     <p class="text-muted">No recent foods yet. Start logging your meals!</p>
   {:else}
-    <div class="foods-list">
-      {#each foods.slice(0, 10) as food, index (food.name + food.last_used)}
+    <div class="foods-list scrollable">
+      {#each foods as food, index (food.name + food.last_used)}
         <div class="food-item">
           <div class="food-info">
             <strong>{food.name}</strong>
@@ -110,6 +110,22 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .foods-list::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .foods-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  .foods-list::-webkit-scrollbar-track {
+    background: var(--bg);
   }
 
   .food-item {

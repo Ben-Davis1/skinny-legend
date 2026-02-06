@@ -92,6 +92,14 @@
     push(`/nutrition/${day.date}`);
   }
 
+  function getCalorieColorClass(current, goal) {
+    if (!goal) return '';
+    const percentage = (current / goal) * 100;
+    if (percentage > 100) return 'over-goal';
+    if (percentage >= 90) return 'near-goal';
+    return '';
+  }
+
   async function handleDeleteDay(day, event) {
     event.stopPropagation(); // Prevent navigation
 
@@ -205,7 +213,9 @@
               </div>
             </div>
             <div class="history-stats">
-              <span>{Math.round(day.total_calories)} cal</span>
+              <span class="calorie-display {getCalorieColorClass(day.total_calories, day.calorie_goal)}">
+                {Math.round(day.total_calories)} / {day.calorie_goal || 2000} cal
+              </span>
               <span>•</span>
               <span>P: {Math.round(day.macros.protein_g)}g</span>
               <span>C: {Math.round(day.macros.carbs_g)}g</span>
@@ -320,6 +330,18 @@
 
   .history-stats span {
     margin-right: 0.5rem;
+  }
+
+  .calorie-display {
+    font-weight: 600;
+  }
+
+  .calorie-display.near-goal {
+    color: #FF9800; /* Orange */
+  }
+
+  .calorie-display.over-goal {
+    color: #F44336; /* Red */
   }
 
   .history-extras {

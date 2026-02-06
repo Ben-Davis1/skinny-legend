@@ -169,6 +169,7 @@ def get_nutrition_history():
         history.append({
             'date': log['date'],
             'total_calories': log['total_calories'],
+            'calorie_goal': log.get('calorie_goal', 2000),
             'total_water_ml': log['total_water_ml'],
             'exercise_minutes': log['exercise_minutes'],
             'macros': macro_totals,

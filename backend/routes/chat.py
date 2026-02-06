@@ -10,12 +10,13 @@ def chat():
     data = request.json
     message = data.get('message')
     conversation_history = data.get('history', [])
+    context = data.get('context', {})
 
     if not message:
         return jsonify({'error': 'Message is required'}), 400
 
     try:
-        result = get_food_suggestions(message, conversation_history)
+        result = get_food_suggestions(message, conversation_history, context)
         return jsonify(result)
 
     except Exception as e:

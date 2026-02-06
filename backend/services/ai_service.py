@@ -164,7 +164,7 @@ Replace the 0 values with your estimates. Be as accurate as possible."""
     except Exception as e:
         raise Exception(f"Failed to analyze image: {str(e)}")
 
-def get_food_suggestions(user_message, conversation_history=None):
+def get_food_suggestions(user_message, conversation_history=None, context=None):
     """Get food entry suggestions from natural language"""
     try:
         # Build conversation
@@ -265,10 +265,30 @@ Remember: ONLY JSON, no explanations. Extract supplements/vitamins/medications w
                 "content": '{"items": [], "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}, "supplements": []}, "needs_clarification": false, "message": "I understand. I will respond with only JSON format."}'
             })
 
-        # Add user message
+        # Add context if provided
+        context_message = ""
+        if context:
+            context_message = f"\n\nCONTEXT FOR TODAY:\n"
+            if context.get('current_meals'):
+                total_cals = context.get('total_calories', 0)
+                goal_cals = context.get('calorie_goal', 2000)
+                context_message += f"Already eaten today ({total_cals}/{goal_cals} cal):\n"
+                for meal in context.get('current_meals', []):
+                    context_message += f"- {meal['name']} ({meal['calories']} cal, {meal['meal_type']})\n"
+
+            if context.get('recent_foods'):
+                context_message += f"\nRecently logged foods:\n"
+                for food in context.get('recent_foods', [])[:10]:
+                    context_message += f"- {food['name']} ({food['serving_size']}, {food['calories']} cal)\n"
+
+        # Add user message with context
+        full_message = user_message
+        if context_message:
+            full_message = context_message + "\n\nUSER MESSAGE: " + user_message
+
         messages.append({
             "role": "user",
-            "content": user_message
+            "content": full_message
         })
 
         # Call Claude (using Sonnet 4.5 for better instruction following)

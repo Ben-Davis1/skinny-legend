@@ -184,6 +184,14 @@
     carbs: acc.carbs + entry.carbs_g,
     fat: acc.fat + entry.fat_g
   }), { protein: 0, carbs: 0, fat: 0 });
+
+  function getCalorieColorClass(current, goal) {
+    if (!goal) return '';
+    const percentage = (current / goal) * 100;
+    if (percentage > 100) return 'over-goal';
+    if (percentage >= 90) return 'near-goal';
+    return '';
+  }
 </script>
 
 <div class="container">
@@ -258,7 +266,9 @@
           <h3>Daily Summary</h3>
           <div class="stat">
             <span class="stat-label">Total Calories</span>
-            <span class="stat-value">{Math.round(dailyLog.total_calories)}</span>
+            <span class="stat-value {getCalorieColorClass(dailyLog.total_calories, dailyLog.calorie_goal)}">
+              {Math.round(dailyLog.total_calories)} / {dailyLog.calorie_goal || 2000}
+            </span>
           </div>
           <div class="stat">
             <span class="stat-label">Protein</span>
@@ -397,6 +407,14 @@
     font-size: 1.25rem;
     font-weight: bold;
     color: var(--primary);
+  }
+
+  .stat-value.near-goal {
+    color: #FF9800; /* Orange */
+  }
+
+  .stat-value.over-goal {
+    color: #F44336; /* Red */
   }
 
   .entries-list {

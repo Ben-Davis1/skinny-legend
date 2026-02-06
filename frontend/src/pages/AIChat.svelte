@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { ai, foodEntries, dailyLogs, exercises, supplements } from '../lib/api.js';
+  import { ai, foodEntries, dailyLogs, exercises, supplements, recentFoods } from '../lib/api.js';
   import { selectedDate } from '../lib/stores.js';
 
   let messages = [];
@@ -10,6 +10,8 @@
   let conversationHistory = [];
   let currentDate;
   let currentLog = null;
+  let currentEntries = [];
+  let recentFoodsList = [];
 
   selectedDate.subscribe(async value => {
     currentDate = value;
@@ -20,12 +22,26 @@
 
   onMount(async () => {
     currentLog = await dailyLogs.getByDate(currentDate);
+    await loadTodayContext();
     messages.push({
       role: 'assistant',
       content: 'Hi! I\'m your nutrition assistant. Tell me what you ate and I\'ll help log it.',
       timestamp: new Date()
     });
   });
+
+  async function loadTodayContext() {
+    try {
+      // Load current food entries
+      if (currentLog) {
+        currentEntries = await foodEntries.getByLog(currentLog.id);
+      }
+      // Load recent foods
+      recentFoodsList = await recentFoods.get();
+    } catch (err) {
+      console.error('Failed to load context:', err);
+    }
+  }
 
   async function sendMessage() {
     if (!inputMessage.trim()) return;
@@ -44,7 +60,24 @@
       loading = true;
       error = '';
 
-      const response = await ai.chat(userMessage, conversationHistory);
+      // Build context about today's meals
+      const totalCalories = currentEntries.reduce((sum, entry) => sum + entry.calories, 0);
+      const context = {
+        current_meals: currentEntries.map(e => ({
+          name: e.name,
+          calories: e.calories,
+          meal_type: e.meal_type
+        })),
+        total_calories: totalCalories,
+        calorie_goal: currentLog?.calorie_goal || 2000,
+        recent_foods: recentFoodsList.slice(0, 20).map(f => ({
+          name: f.name,
+          calories: f.calories,
+          serving_size: f.serving_size
+        }))
+      };
+
+      const response = await ai.chat(userMessage, conversationHistory, context);
 
       // Debug log the response
       console.log('AI Response:', JSON.stringify(response, null, 2));
@@ -181,6 +214,9 @@
         timestamp: new Date()
       });
       messages = messages;
+
+      // Reload context after adding
+      await loadTodayContext();
     } catch (err) {
       error = `Failed to add food: ${err.message}`;
     }
@@ -220,6 +256,12 @@
         timestamp: new Date()
       });
       messages = messages;
+
+      // Show success alert
+      alert(`✅ Successfully added all ${successCount} items to your log!`);
+
+      // Reload context after adding
+      await loadTodayContext();
     } catch (err) {
       error = `Failed to add items: ${err.message}`;
     }
