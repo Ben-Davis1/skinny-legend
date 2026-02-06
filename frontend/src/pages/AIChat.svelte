@@ -46,6 +46,9 @@
 
       const response = await ai.chat(userMessage, conversationHistory);
 
+      // Debug log the response
+      console.log('AI Response:', JSON.stringify(response, null, 2));
+
       conversationHistory.push(
         { role: 'user', content: userMessage },
         { role: 'assistant', content: JSON.stringify(response) }
@@ -232,16 +235,19 @@
                 {#each message.items as item (item.name + item.calories)}
                   <div class="food-item">
                     <div class="item-details">
-                      <strong>{item.name}</strong>
+                      <strong>{item.name || 'Unknown'}</strong>
                       {#if item.meal_type}
                         <span class="meal-badge">{item.meal_type}</span>
                       {/if}
                       <span class="text-muted">
-                        {item.serving_size} • {item.calories} cal
+                        {item.serving_size || 'N/A'} • {item.calories || 0} cal
                       </span>
                       <span class="text-muted">
-                        P: {item.protein_g}g, C: {item.carbs_g}g, F: {item.fat_g}g
+                        P: {item.protein_g || 0}g, C: {item.carbs_g || 0}g, F: {item.fat_g || 0}g
                       </span>
+                      {#if item.reasoning}
+                        <span class="reasoning">💡 {item.reasoning}</span>
+                      {/if}
                     </div>
                     <button class="primary" on:click={() => addItemToLog(item)}>
                       Add
@@ -379,6 +385,14 @@
 
   .item-details span {
     font-size: 0.875rem;
+  }
+
+  .reasoning {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--secondary);
+    font-style: italic;
+    margin-top: 0.25rem;
   }
 
   .meal-badge {

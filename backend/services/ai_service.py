@@ -185,7 +185,7 @@ CRITICAL RULES:
 3. Provide realistic nutritional estimates based on typical servings
 4. Break down mixed dishes into individual components
 
-Response format (respond with ONLY this JSON):
+Response format - YOU MUST USE EXACTLY THIS STRUCTURE:
 {
     "items": [
         {
@@ -197,7 +197,8 @@ Response format (respond with ONLY this JSON):
             "fat_g": 8,
             "fiber_g": 3,
             "sugar_g": 6,
-            "meal_type": "breakfast"
+            "meal_type": "breakfast",
+            "reasoning": "Each slice of shokopan is ~120 cal, plus 20 cal for 1 tsp Flora butter per slice = 280 total"
         }
     ],
     "actions": {
@@ -207,6 +208,8 @@ Response format (respond with ONLY this JSON):
     "needs_clarification": false,
     "message": "I found 2 slices of shokopan toast with Flora butter from your breakfast. Would you like to add this?"
 }
+
+CRITICAL: ALL numeric values MUST be numbers, not strings. calories must be a number like 280, NOT "280".
 
 Meal type detection:
 - "breakfast", "morning" = "breakfast"
@@ -220,8 +223,8 @@ User: "I had 2 eggs and toast for breakfast"
 Response:
 {
     "items": [
-        {"name": "Scrambled Eggs", "serving_size": "2 eggs", "calories": 180, "protein_g": 12, "carbs_g": 2, "fat_g": 14, "fiber_g": 0, "sugar_g": 1, "meal_type": "breakfast"},
-        {"name": "Toast", "serving_size": "2 slices", "calories": 160, "protein_g": 6, "carbs_g": 30, "fat_g": 2, "fiber_g": 2, "sugar_g": 4, "meal_type": "breakfast"}
+        {"name": "Scrambled Eggs", "serving_size": "2 eggs", "calories": 180, "protein_g": 12, "carbs_g": 2, "fat_g": 14, "fiber_g": 0, "sugar_g": 1, "meal_type": "breakfast", "reasoning": "2 large eggs = ~140 cal, cooked with ~1 tsp butter = +40 cal"},
+        {"name": "Toast", "serving_size": "2 slices", "calories": 160, "protein_g": 6, "carbs_g": 30, "fat_g": 2, "fiber_g": 2, "sugar_g": 4, "meal_type": "breakfast", "reasoning": "2 slices white bread = ~80 cal each"}
     ],
     "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}},
     "needs_clarification": false,
@@ -232,8 +235,8 @@ User: "200g chicken breast and salad for lunch"
 Response:
 {
     "items": [
-        {"name": "Chicken Breast", "serving_size": "200g", "calories": 330, "protein_g": 62, "carbs_g": 0, "fat_g": 7, "fiber_g": 0, "sugar_g": 0, "meal_type": "lunch"},
-        {"name": "Mixed Salad", "serving_size": "1 bowl", "calories": 50, "protein_g": 2, "carbs_g": 8, "fat_g": 1, "fiber_g": 3, "sugar_g": 4, "meal_type": "lunch"}
+        {"name": "Chicken Breast", "serving_size": "200g", "calories": 330, "protein_g": 62, "carbs_g": 0, "fat_g": 7, "fiber_g": 0, "sugar_g": 0, "meal_type": "lunch", "reasoning": "Skinless chicken breast is ~165 cal per 100g, so 200g = 330 cal"},
+        {"name": "Mixed Salad", "serving_size": "1 bowl", "calories": 50, "protein_g": 2, "carbs_g": 8, "fat_g": 1, "fiber_g": 3, "sugar_g": 4, "meal_type": "lunch", "reasoning": "Standard mixed salad with lettuce, tomatoes, cucumber = ~50 cal"}
     ],
     "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}},
     "needs_clarification": false,
@@ -264,7 +267,9 @@ Remember: ONLY JSON, no explanations."""
         response_text = message.content[0].text
 
         # Debug: Log the raw response
-        print(f"Chat Response: {response_text[:300]}...")
+        print(f"=== AI CHAT RAW RESPONSE ===")
+        print(response_text)
+        print(f"=== END RAW RESPONSE ===")
 
         # Try to extract JSON
         try:
