@@ -12,6 +12,7 @@
   let currentLog = null;
   let currentEntries = [];
   let recentFoodsList = [];
+  let addingItem = false;
 
   selectedDate.subscribe(async value => {
     currentDate = value;
@@ -192,6 +193,7 @@
     }
 
     try {
+      addingItem = true;
       const aiNotes = `AI Chat Assistant - Natural language food entry (Auto-detected: ${item.meal_type || 'snack'})`;
 
       await foodEntries.create({
@@ -219,6 +221,8 @@
       await loadTodayContext();
     } catch (err) {
       error = `Failed to add food: ${err.message}`;
+    } finally {
+      addingItem = false;
     }
   }
 
@@ -229,6 +233,7 @@
     }
 
     try {
+      addingItem = true;
       let successCount = 0;
 
       for (const item of items) {
@@ -264,6 +269,8 @@
       await loadTodayContext();
     } catch (err) {
       error = `Failed to add items: ${err.message}`;
+    } finally {
+      addingItem = false;
     }
   }
 
@@ -277,6 +284,12 @@
 
 <div class="container">
   <h1>AI Chat</h1>
+
+  {#if addingItem}
+    <div class="loading-banner">
+      Adding item{addingItem ? '...' : ''}
+    </div>
+  {/if}
 
   {#if error}
     <div class="error">{error}</div>
@@ -292,8 +305,8 @@
             {#if message.items}
               <div class="food-items">
                 {#if message.items.length > 1}
-                  <button class="primary add-all-btn" on:click={() => addAllItems(message.items)}>
-                    ➕ Add All ({message.items.length} items)
+                  <button class="primary add-all-btn" on:click={() => addAllItems(message.items)} disabled={addingItem}>
+                    {addingItem ? '⏳ Adding...' : `➕ Add All (${message.items.length} items)`}
                   </button>
                 {/if}
                 {#each message.items as item (item.name + item.calories)}
@@ -313,8 +326,8 @@
                         <span class="reasoning">💡 {item.reasoning}</span>
                       {/if}
                     </div>
-                    <button class="primary" on:click={() => addItemToLog(item)}>
-                      Add
+                    <button class="primary" on:click={() => addItemToLog(item)} disabled={addingItem}>
+                      {addingItem ? '⏳' : 'Add'}
                     </button>
                   </div>
                 {/each}
@@ -356,6 +369,31 @@
 </div>
 
 <style>
+  .loading-banner {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2196F3;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
   .chat-container {
     display: flex;
     flex-direction: column;

@@ -8,6 +8,7 @@
   let loading = true;
   let servingMultipliers = {}; // Track serving size multiplier for each food
   let mealTypes = {}; // Track meal type for each food
+  let addingIndex = null; // Track which item is being added
 
   onMount(async () => {
     await loadRecentFoods();
@@ -42,11 +43,17 @@
     };
   }
 
-  function handleQuickAdd(food, index) {
+  async function handleQuickAdd(food, index) {
+    addingIndex = index;
     const multiplier = servingMultipliers[index] || 1;
     const adjustedFood = calculateAdjustedNutrition(food, multiplier);
     const mealType = mealTypes[index] || 'snack';
     dispatch('add', { ...adjustedFood, meal_type: mealType });
+
+    // Reset after a delay to allow parent to process
+    setTimeout(() => {
+      addingIndex = null;
+    }, 2000);
   }
 </script>
 
@@ -91,8 +98,8 @@
             <div class="adjusted-cals">
               {calculateAdjustedNutrition(food, servingMultipliers[index]).calories} cal
             </div>
-            <button class="primary" on:click={() => handleQuickAdd(food, index)}>
-              Add
+            <button class="primary" on:click={() => handleQuickAdd(food, index)} disabled={addingIndex === index}>
+              {addingIndex === index ? '⏳' : 'Add'}
             </button>
           </div>
         </div>

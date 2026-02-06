@@ -26,6 +26,7 @@
   let scannedMealType = 'snack';
   let expandedEntry = null;
   let waterTarget = 2500; // Default 2.5L
+  let addingItem = false;
 
   onMount(async () => {
     await loadTodayLog();
@@ -69,18 +70,22 @@
   async function handleSaveEntry(event) {
     const scrollPos = window.scrollY;
     try {
+      addingItem = true;
       await foodEntries.create(event.detail);
       await loadTodayLog();
       await tick();
       window.scrollTo(0, scrollPos);
     } catch (err) {
       error = err.message;
+    } finally {
+      addingItem = false;
     }
   }
 
   async function handleQuickAddFood(event) {
     const scrollPos = window.scrollY;
     try {
+      addingItem = true;
       const foodData = event.detail;
       await foodEntries.create({
         daily_log_id: dailyLog.id,
@@ -92,6 +97,8 @@
       window.scrollTo(0, scrollPos);
     } catch (err) {
       error = err.message;
+    } finally {
+      addingItem = false;
     }
   }
 
@@ -154,6 +161,7 @@
 
     const scrollPos = window.scrollY;
     try {
+      addingItem = true;
       const newEntry = {
         daily_log_id: dailyLog.id,
         name: scannedProduct.name,
@@ -176,6 +184,8 @@
       scannedProduct = null;
     } catch (err) {
       error = `Failed to add food: ${err.message}`;
+    } finally {
+      addingItem = false;
     }
   }
 
@@ -202,6 +212,12 @@
 
 <div class="container">
   <h1>Daily Log - {currentDate}</h1>
+
+  {#if addingItem}
+    <div class="loading-banner">
+      Adding item...
+    </div>
+  {/if}
 
   {#if error}
     <div class="error">{error}</div>
@@ -400,6 +416,31 @@
 </div>
 
 <style>
+  .loading-banner {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2196F3;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
   .summary .stat {
     display: flex;
     justify-content: space-between;
