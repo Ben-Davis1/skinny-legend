@@ -5,6 +5,11 @@ services:
     runtime: python
     plan: free
     region: frankfurt
+    # Persistent disk for database and uploads
+    disk:
+      name: skinny-legend-data
+      mountPath: /data
+      sizeGB: 1
     buildCommand: cd backend && pip install -r requirements.txt
     startCommand: cd backend && bash start.sh
     envVars:
@@ -15,9 +20,9 @@ services:
       - key: ALLOWED_ORIGINS
         value: https://skinny-legend.onrender.com
       - key: DATABASE_PATH
-        value: /opt/render/project/src/backend/skinny_legend.db
+        value: /data/skinny_legend.db
       - key: UPLOAD_DIR
-        value: /opt/render/project/src/backend/uploads
+        value: /data/uploads
     autoDeploy: true
 
   # Frontend
