@@ -177,67 +177,74 @@ def get_food_suggestions(user_message, conversation_history=None):
         if not messages:
             messages.append({
                 "role": "user",
-                "content": """You are a health and nutrition assistant. Help users log their food intake, water consumption, and exercise by extracting information from their descriptions.
+                "content": """You are a nutrition assistant that extracts food information from user descriptions.
 
-CRITICAL: You MUST respond with ONLY valid JSON. Do not include any text before or after the JSON.
+CRITICAL RULES:
+1. ONLY respond with valid JSON - no other text
+2. Extract ALL food items mentioned
+3. Provide realistic nutritional estimates based on typical servings
+4. Break down mixed dishes into individual components
 
-When a user describes food, water, or exercise, respond with ONLY this JSON format:
+Response format (respond with ONLY this JSON):
 {
     "items": [
         {
-            "name": "food name",
-            "serving_size": "amount",
-            "calories": 0,
-            "protein_g": 0,
-            "carbs_g": 0,
-            "fat_g": 0,
-            "fiber_g": 0,
-            "sugar_g": 0,
-            "meal_type": "breakfast|lunch|dinner|snack"
+            "name": "Shokopan Toast with Flora Butter",
+            "serving_size": "2 slices",
+            "calories": 280,
+            "protein_g": 8,
+            "carbs_g": 45,
+            "fat_g": 8,
+            "fiber_g": 3,
+            "sugar_g": 6,
+            "meal_type": "breakfast"
         }
     ],
     "actions": {
         "water_ml": 0,
-        "exercise": {
-            "type": "",
-            "duration_minutes": 0,
-            "notes": ""
-        }
+        "exercise": {"type": "", "duration_minutes": 0, "notes": ""}
     },
     "needs_clarification": false,
-    "message": "friendly response to user"
+    "message": "I found 2 slices of shokopan toast with Flora butter from your breakfast. Would you like to add this?"
 }
 
-IMPORTANT EXTRACTION RULES:
+Meal type detection:
+- "breakfast", "morning" = "breakfast"
+- "lunch", "midday" = "lunch"
+- "dinner", "evening" = "dinner"
+- Otherwise = "snack"
 
-1. MEAL TYPE - Extract from user's message:
-   - "breakfast", "morning", "this morning" → "breakfast"
-   - "lunch", "midday", "noon" → "lunch"
-   - "dinner", "supper", "evening", "tonight" → "dinner"
-   - No meal time mentioned → "snack"
+EXAMPLES:
 
-2. WATER - Extract water intake:
-   - "glass of water" = 250ml per glass
-   - "cup of water" = 250ml per cup
-   - "bottle of water" = 500ml per bottle
-   - "liter" or "L" = 1000ml
-   - "ml" or "milliliters" = direct value
-   - Examples: "2 glasses" = 500ml, "1.5 liters" = 1500ml
+User: "I had 2 eggs and toast for breakfast"
+Response:
+{
+    "items": [
+        {"name": "Scrambled Eggs", "serving_size": "2 eggs", "calories": 180, "protein_g": 12, "carbs_g": 2, "fat_g": 14, "fiber_g": 0, "sugar_g": 1, "meal_type": "breakfast"},
+        {"name": "Toast", "serving_size": "2 slices", "calories": 160, "protein_g": 6, "carbs_g": 30, "fat_g": 2, "fiber_g": 2, "sugar_g": 4, "meal_type": "breakfast"}
+    ],
+    "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}},
+    "needs_clarification": false,
+    "message": "I found eggs and toast from your breakfast. Would you like to add these items?"
+}
 
-3. EXERCISE - Extract exercise activity:
-   - Detect activities: running, walking, cycling, swimming, gym, workout, yoga, etc.
-   - Extract duration in minutes
-   - Map activities to types: Running, Walking, Cycling, Swimming, Weightlifting, Yoga, Cardio, Sports, HIIT, Other
-   - Examples: "ran 30 minutes" = {"type": "Running", "duration_minutes": 30}
-   - "went to gym for an hour" = {"type": "Weightlifting", "duration_minutes": 60}
+User: "200g chicken breast and salad for lunch"
+Response:
+{
+    "items": [
+        {"name": "Chicken Breast", "serving_size": "200g", "calories": 330, "protein_g": 62, "carbs_g": 0, "fat_g": 7, "fiber_g": 0, "sugar_g": 0, "meal_type": "lunch"},
+        {"name": "Mixed Salad", "serving_size": "1 bowl", "calories": 50, "protein_g": 2, "carbs_g": 8, "fat_g": 1, "fiber_g": 3, "sugar_g": 4, "meal_type": "lunch"}
+    ],
+    "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}},
+    "needs_clarification": false,
+    "message": "I found chicken breast and salad from your lunch. Ready to add?"
+}
 
-If only water or exercise is mentioned (no food), leave items as empty array [].
-If you need more information, set needs_clarification to true and ask in the message field.
-Always use numbers (not strings) for nutritional values and numeric fields."""
+Remember: ONLY JSON, no explanations."""
             })
             messages.append({
                 "role": "assistant",
-                "content": "I understand. I'll help you log your food, water intake, and exercise activities with nutritional estimates."
+                "content": '{"items": [], "actions": {"water_ml": 0, "exercise": {"type": "", "duration_minutes": 0, "notes": ""}}, "needs_clarification": false, "message": "I understand. I will respond with only JSON format."}'
             })
 
         # Add user message
@@ -246,9 +253,9 @@ Always use numbers (not strings) for nutritional values and numeric fields."""
             "content": user_message
         })
 
-        # Call Claude (using latest Haiku - most cost-efficient)
+        # Call Claude (using Sonnet for better instruction following)
         message = client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model="claude-3-5-sonnet-20241022",
             max_tokens=2048,
             messages=messages
         )
@@ -274,13 +281,16 @@ Always use numbers (not strings) for nutritional values and numeric fields."""
 
             result = json.loads(json_str)
         except json.JSONDecodeError as e:
-            # If JSON parsing fails, return a message response
+            # If JSON parsing fails, return a helpful message
             print(f"Chat JSON Parse Error: {e}")
             print(f"Attempted to parse: {json_str[:200] if json_str else 'None'}...")
+            print(f"Full response: {response_text}")
+
+            # Try to be helpful even when parsing fails
             result = {
                 "items": [],
                 "needs_clarification": True,
-                "message": response_text if response_text else "I couldn't process that. Could you try again?"
+                "message": "I understand you mentioned some food, but I'm having trouble parsing the details. Could you try describing it more simply? For example: 'I had 2 eggs and toast for breakfast' or 'chicken breast 200g for lunch'"
             }
 
         return result
