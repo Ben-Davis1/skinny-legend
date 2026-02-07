@@ -118,8 +118,9 @@ def calculate_macro_targets(calorie_goal, weight_kg, goal):
 def calculate_water_target(weight_kg, activity_level):
     """
     Calculate daily water target in ml based on weight and activity level
+    Aligned with NHS/UK guidelines (more conservative than 35ml/kg)
 
-    Base: 35ml per kg body weight
+    Base: 30ml per kg body weight (aligns with NHS ~2L for men, ~1.6L for women)
     Activity multiplier adds extra hydration needs
 
     Args:
@@ -129,16 +130,17 @@ def calculate_water_target(weight_kg, activity_level):
     Returns:
         Daily water target in milliliters
     """
-    # Base calculation: 35ml per kg
-    base_water = weight_kg * 35
+    # Base calculation: 30ml per kg (more conservative, matches NHS guidelines better)
+    base_water = weight_kg * 30
 
     # Activity multipliers for additional hydration needs
+    # More conservative than before - only add water if actually sweating
     activity_multipliers = {
         'sedentary': 1.0,           # No additional
-        'lightly_active': 1.1,      # +10%
-        'moderately_active': 1.15,  # +15%
-        'very_active': 1.2,         # +20%
-        'extra_active': 1.25        # +25%
+        'lightly_active': 1.05,     # +5%
+        'moderately_active': 1.1,   # +10%
+        'very_active': 1.15,        # +15%
+        'extra_active': 1.2         # +20%
     }
 
     multiplier = activity_multipliers.get(activity_level, 1.0)
