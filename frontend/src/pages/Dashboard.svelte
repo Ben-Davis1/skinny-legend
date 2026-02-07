@@ -228,6 +228,7 @@
   {#if loading}
     <div class="loading">Loading...</div>
   {:else if dailyLog}
+    <div class="dashboard-wrapper">
     <div class="grid grid-2 dashboard-grid">
       <div class="left-column">
         <FoodEntry
@@ -418,6 +419,7 @@
           {/each}
         </div>
       {/if}
+    </div>
     </div>
   {/if}
 </div>
@@ -643,10 +645,14 @@
       min-width: auto;
     }
 
-    /* Mobile reordering: Calorie summary first, then food entries, then everything else */
-    .dashboard-grid {
+    /* Mobile reordering: Calorie summary first, then food entries right below, then everything else */
+    .dashboard-wrapper {
       display: flex;
       flex-direction: column;
+    }
+
+    .dashboard-grid {
+      display: contents;
     }
 
     .daily-summary {
@@ -658,11 +664,15 @@
     }
 
     .left-column {
-      order: 3;
+      order: 4;
+    }
+
+    .right-column {
+      display: contents;
     }
 
     .right-column > *:not(.daily-summary) {
-      order: 4;
+      order: 3;
     }
   }
 </style>
