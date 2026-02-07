@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from database import query_db, execute_db
-from services.calculations import calculate_bmr, calculate_tdee, calculate_calorie_goal, calculate_macro_targets, calculate_water_target
+from services.calculations import calculate_bmr, calculate_tdee, calculate_calorie_goal, calculate_macro_targets, calculate_water_target, get_rda_targets
 
 bp = Blueprint('user_profile', __name__, url_prefix='/api/profile')
 
@@ -72,6 +72,21 @@ def create_profile():
             data.get('custom_water_target_ml')
         ]
     )
+
+    # Populate vitamin targets with RDA values
+    rdas = get_rda_targets(data['age'], data['gender'])
+    for nutrient, amount in rdas.items():
+        # Convert underscore names to display names
+        nutrient_display = nutrient.replace('_', ' ').title()
+        unit = 'mcg' if '_mcg' in nutrient else 'mg'
+
+        # Insert or replace target
+        execute_db(
+            '''INSERT OR REPLACE INTO vitamin_targets
+               (user_id, nutrient_name, target_amount, unit)
+               VALUES (?, ?, ?, ?)''',
+            [user_id, nutrient_display, amount, unit]
+        )
 
     profile = query_db('SELECT * FROM user_profile WHERE id = ?', [profile_id], one=True)
     return jsonify(profile), 201
@@ -162,6 +177,20 @@ def update_profile():
                VALUES (?, ?, ?, ?)''',
             [user_id, today, new_weight, 'Updated from profile']
         )
+
+    # Update vitamin targets if age or gender changed
+    if not current_profile or current_profile['age'] != data['age'] or current_profile['gender'] != data['gender']:
+        rdas = get_rda_targets(data['age'], data['gender'])
+        for nutrient, amount in rdas.items():
+            nutrient_display = nutrient.replace('_', ' ').title()
+            unit = 'mcg' if '_mcg' in nutrient else 'mg'
+
+            execute_db(
+                '''INSERT OR REPLACE INTO vitamin_targets
+                   (user_id, nutrient_name, target_amount, unit)
+                   VALUES (?, ?, ?, ?)''',
+                [user_id, nutrient_display, amount, unit]
+            )
 
     profile = query_db('SELECT * FROM user_profile WHERE user_id = ?', [user_id], one=True)
     return jsonify(profile)

@@ -147,3 +147,52 @@ def calculate_water_target(weight_kg, activity_level):
     water_target = round((base_water * multiplier) / 250) * 250
 
     return int(water_target)
+
+def get_rda_targets(age, gender):
+    """
+    Get Recommended Daily Allowance (RDA) for micronutrients
+    Based on USDA guidelines for adults
+
+    Args:
+        age: Age in years
+        gender: 'male', 'female', or 'other'
+
+    Returns:
+        Dictionary with micronutrient RDA values
+    """
+    # Base RDAs for adults (19-50 years)
+    rdas = {
+        'vitamin_a_mcg': 900 if gender == 'male' else 700,  # Higher for men
+        'vitamin_c_mg': 90 if gender == 'male' else 75,     # Higher for men
+        'vitamin_d_mcg': 15,  # 600 IU for adults 19-70
+        'vitamin_e_mg': 15,   # Same for both
+        'vitamin_k_mcg': 120 if gender == 'male' else 90,   # Higher for men
+        'vitamin_b6_mg': 1.3,  # 19-50 years
+        'vitamin_b12_mcg': 2.4,  # Same for both
+        'folate_mcg': 400,  # Same for both
+        'calcium_mg': 1000,  # 19-50 years
+        'iron_mg': 8 if gender == 'male' else 18,  # Much higher for women (menstruation)
+        'magnesium_mg': 400 if gender == 'male' else 310,  # Higher for men
+        'potassium_mg': 3400 if gender == 'male' else 2600,  # Higher for men
+        'zinc_mg': 11 if gender == 'male' else 8,  # Higher for men
+        'sodium_mg': 1500  # Adequate Intake (AI), not RDA - upper limit is 2300mg
+    }
+
+    # Adjust for age groups
+    if age >= 51:
+        rdas['vitamin_b6_mg'] = 1.7 if gender == 'male' else 1.5
+        rdas['calcium_mg'] = 1200 if gender == 'female' else 1000  # Women need more after 50
+        rdas['magnesium_mg'] = 420 if gender == 'male' else 320
+        rdas['iron_mg'] = 8  # Post-menopausal women need same as men
+
+    if age >= 71:
+        rdas['vitamin_d_mcg'] = 20  # 800 IU for 71+
+        rdas['calcium_mg'] = 1200  # Both genders
+
+    # Use average for 'other' gender
+    if gender == 'other':
+        male_values = get_rda_targets(age, 'male')
+        female_values = get_rda_targets(age, 'female')
+        rdas = {k: (male_values[k] + female_values[k]) / 2 for k in male_values.keys()}
+
+    return rdas
