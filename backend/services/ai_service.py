@@ -258,7 +258,25 @@ Response:
     "message": "I logged Vitamin D and Omega-3 supplements for you!"
 }
 
-Remember: ONLY JSON, no explanations. Extract supplements/vitamins/medications when mentioned."""
+User: "Went for a 30 minute run this morning"
+Response:
+{
+    "items": [],
+    "actions": {"water_ml": 0, "exercise": {"type": "Running", "duration_minutes": 30, "notes": "Morning run"}, "supplements": []},
+    "needs_clarification": false,
+    "message": "Logged your 30 minute run!"
+}
+
+User: "Did 45 mins at the gym - weights and cardio"
+Response:
+{
+    "items": [],
+    "actions": {"water_ml": 0, "exercise": {"type": "Gym (weights + cardio)", "duration_minutes": 45, "notes": ""}, "supplements": []},
+    "needs_clarification": false,
+    "message": "Logged your 45 minute gym session!"
+}
+
+Remember: ONLY JSON, no explanations. Extract supplements/vitamins/medications and exercise when mentioned."""
             })
             messages.append({
                 "role": "assistant",
