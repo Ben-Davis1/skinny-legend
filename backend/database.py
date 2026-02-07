@@ -7,15 +7,17 @@ DATABASE_PATH = os.getenv('DATABASE_PATH', './skinny_legend.db')
 def init_db():
     """Initialize the database with the schema"""
     conn = sqlite3.connect(DATABASE_PATH)
-
-    # Run migrations first
-    migrate_db(conn)
-
     with open('schema.sql', 'r') as f:
         conn.executescript(f.read())
     conn.commit()
     conn.close()
     print(f"Database initialized at {DATABASE_PATH}")
+
+def run_migrations():
+    """Run all database migrations (safe to run on existing databases)"""
+    conn = sqlite3.connect(DATABASE_PATH)
+    migrate_db(conn)
+    conn.close()
 
 def migrate_db(conn):
     """Run database migrations"""

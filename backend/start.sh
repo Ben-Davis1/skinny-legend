@@ -19,5 +19,9 @@ else
     echo "Database already exists at $DB_FILE"
 fi
 
+# Always run migrations (safe to run on existing databases)
+echo "Running database migrations..."
+python3 -c "from database import run_migrations; run_migrations()"
+
 # Start the application with gunicorn
 exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120 app:app
