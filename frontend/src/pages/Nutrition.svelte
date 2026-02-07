@@ -9,6 +9,7 @@
   let nutritionData = null;
   let loading = false;
   let error = '';
+  let expandedMicro = null; // Track which micronutrient is expanded
 
   $: if (params.date) {
     selectedDay = params.date;
@@ -164,14 +165,32 @@
     <div class="card">
       <h3>Micronutrients</h3>
       <div class="micronutrients">
-        <div class="micro-item">
-          <div class="micro-header">
-            <span>Vitamin A</span>
+        <div class="micro-item" class:expanded={expandedMicro === 'vitamin_a_mcg'}>
+          <div class="micro-header clickable" on:click={() => expandedMicro = expandedMicro === 'vitamin_a_mcg' ? null : 'vitamin_a_mcg'}>
+            <span>Vitamin A {expandedMicro === 'vitamin_a_mcg' ? '▼' : '▶'}</span>
             <span>{formatNumber(nutritionData.micronutrients.vitamin_a_mcg)} / {defaultTargets['Vitamin A'].amount} mcg</span>
           </div>
           <div class="progress-bar">
             <div class="progress-fill" style="width: {getProgress(nutritionData.micronutrients.vitamin_a_mcg, defaultTargets['Vitamin A'].amount)}%"></div>
           </div>
+          {#if expandedMicro === 'vitamin_a_mcg' && nutritionData.micronutrient_sources?.vitamin_a_mcg}
+            <div class="micro-sources">
+              <strong>Sources:</strong>
+              {#if nutritionData.micronutrient_sources.vitamin_a_mcg.length === 0}
+                <p class="text-muted">No sources logged today</p>
+              {:else}
+                <ul>
+                  {#each nutritionData.micronutrient_sources.vitamin_a_mcg as source}
+                    <li>
+                      <span class="source-name">{source.name}</span>
+                      <span class="source-amount">{source.amount} mcg</span>
+                      <span class="source-type {source.type}">{source.type}</span>
+                    </li>
+                  {/each}
+                </ul>
+              {/if}
+            </div>
+          {/if}
         </div>
 
         <div class="micro-item">
@@ -313,12 +332,89 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    padding: 1rem;
+    background: var(--white);
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+
+  .micro-item.expanded {
+    background: var(--bg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   .micro-header {
     display: flex;
     justify-content: space-between;
     font-size: 0.875rem;
+  }
+
+  .micro-header.clickable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .micro-header.clickable:hover {
+    color: var(--primary);
+  }
+
+  .micro-sources {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .micro-sources strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-light);
+  }
+
+  .micro-sources ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .micro-sources li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--white);
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+
+  .source-name {
+    flex: 1;
+    font-weight: 500;
+  }
+
+  .source-amount {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .source-type {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    text-transform: capitalize;
+  }
+
+  .source-type.food {
+    background: #e3f2fd;
+    color: #1976D2;
+  }
+
+  .source-type.supplement {
+    background: #f3e5f5;
+    color: #7B1FA2;
   }
 
   .progress-bar {
