@@ -16,14 +16,22 @@
     loadNutrition();
   }
 
-  const defaultTargets = {
-    'Vitamin A': { amount: 900, unit: 'mcg' },
-    'Vitamin C': { amount: 90, unit: 'mg' },
-    'Vitamin D': { amount: 20, unit: 'mcg' },
-    'Calcium': { amount: 1000, unit: 'mg' },
-    'Iron': { amount: 18, unit: 'mg' },
-    'Potassium': { amount: 3500, unit: 'mg' }
-  };
+  const micronutrients = [
+    { key: 'vitamin_a_mcg', name: 'Vitamin A', target: 900, unit: 'mcg' },
+    { key: 'vitamin_c_mg', name: 'Vitamin C', target: 90, unit: 'mg' },
+    { key: 'vitamin_d_mcg', name: 'Vitamin D', target: 20, unit: 'mcg' },
+    { key: 'vitamin_e_mg', name: 'Vitamin E', target: 15, unit: 'mg' },
+    { key: 'vitamin_k_mcg', name: 'Vitamin K', target: 120, unit: 'mcg' },
+    { key: 'vitamin_b6_mg', name: 'Vitamin B6', target: 1.3, unit: 'mg' },
+    { key: 'vitamin_b12_mcg', name: 'Vitamin B12', target: 2.4, unit: 'mcg' },
+    { key: 'folate_mcg', name: 'Folate', target: 400, unit: 'mcg' },
+    { key: 'calcium_mg', name: 'Calcium', target: 1000, unit: 'mg' },
+    { key: 'iron_mg', name: 'Iron', target: 18, unit: 'mg' },
+    { key: 'magnesium_mg', name: 'Magnesium', target: 400, unit: 'mg' },
+    { key: 'potassium_mg', name: 'Potassium', target: 3500, unit: 'mg' },
+    { key: 'zinc_mg', name: 'Zinc', target: 11, unit: 'mg' },
+    { key: 'sodium_mg', name: 'Sodium', target: 1500, unit: 'mg' }
+  ];
 
   onMount(async () => {
     await loadNutrition();
@@ -165,83 +173,35 @@
     <div class="card">
       <h3>Micronutrients</h3>
       <div class="micronutrients">
-        <div class="micro-item" class:expanded={expandedMicro === 'vitamin_a_mcg'}>
-          <div class="micro-header clickable" on:click={() => expandedMicro = expandedMicro === 'vitamin_a_mcg' ? null : 'vitamin_a_mcg'}>
-            <span>Vitamin A {expandedMicro === 'vitamin_a_mcg' ? '▼' : '▶'}</span>
-            <span>{formatNumber(nutritionData.micronutrients.vitamin_a_mcg)} / {defaultTargets['Vitamin A'].amount} mcg</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: {getProgress(nutritionData.micronutrients.vitamin_a_mcg, defaultTargets['Vitamin A'].amount)}%"></div>
-          </div>
-          {#if expandedMicro === 'vitamin_a_mcg' && nutritionData.micronutrient_sources?.vitamin_a_mcg}
-            <div class="micro-sources">
-              <strong>Sources:</strong>
-              {#if nutritionData.micronutrient_sources.vitamin_a_mcg.length === 0}
-                <p class="text-muted">No sources logged today</p>
-              {:else}
-                <ul>
-                  {#each nutritionData.micronutrient_sources.vitamin_a_mcg as source}
-                    <li>
-                      <span class="source-name">{source.name}</span>
-                      <span class="source-amount">{source.amount} mcg</span>
-                      <span class="source-type {source.type}">{source.type}</span>
-                    </li>
-                  {/each}
-                </ul>
-              {/if}
+        {#each micronutrients as micro}
+          <div class="micro-item" class:expanded={expandedMicro === micro.key}>
+            <div class="micro-header clickable" on:click={() => expandedMicro = expandedMicro === micro.key ? null : micro.key}>
+              <span>{micro.name} {expandedMicro === micro.key ? '▼' : '▶'}</span>
+              <span>{formatNumber(nutritionData.micronutrients[micro.key])} / {micro.target} {micro.unit}</span>
             </div>
-          {/if}
-        </div>
-
-        <div class="micro-item">
-          <div class="micro-header">
-            <span>Vitamin C</span>
-            <span>{formatNumber(nutritionData.micronutrients.vitamin_c_mg)} / {defaultTargets['Vitamin C'].amount} mg</span>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: {getProgress(nutritionData.micronutrients[micro.key], micro.target)}%"></div>
+            </div>
+            {#if expandedMicro === micro.key && nutritionData.micronutrient_sources?.[micro.key]}
+              <div class="micro-sources">
+                <strong>Sources:</strong>
+                {#if nutritionData.micronutrient_sources[micro.key].length === 0}
+                  <p class="text-muted">No sources logged today</p>
+                {:else}
+                  <ul>
+                    {#each nutritionData.micronutrient_sources[micro.key] as source}
+                      <li>
+                        <span class="source-name">{source.name}</span>
+                        <span class="source-amount">{source.amount} {micro.unit}</span>
+                        <span class="source-type {source.type}">{source.type}</span>
+                      </li>
+                    {/each}
+                  </ul>
+                {/if}
+              </div>
+            {/if}
           </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: {getProgress(nutritionData.micronutrients.vitamin_c_mg, defaultTargets['Vitamin C'].amount)}%"></div>
-          </div>
-        </div>
-
-        <div class="micro-item">
-          <div class="micro-header">
-            <span>Vitamin D</span>
-            <span>{formatNumber(nutritionData.micronutrients.vitamin_d_mcg)} / {defaultTargets['Vitamin D'].amount} mcg</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: {getProgress(nutritionData.micronutrients.vitamin_d_mcg, defaultTargets['Vitamin D'].amount)}%"></div>
-          </div>
-        </div>
-
-        <div class="micro-item">
-          <div class="micro-header">
-            <span>Calcium</span>
-            <span>{formatNumber(nutritionData.micronutrients.calcium_mg)} / {defaultTargets['Calcium'].amount} mg</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: {getProgress(nutritionData.micronutrients.calcium_mg, defaultTargets['Calcium'].amount)}%"></div>
-          </div>
-        </div>
-
-        <div class="micro-item">
-          <div class="micro-header">
-            <span>Iron</span>
-            <span>{formatNumber(nutritionData.micronutrients.iron_mg)} / {defaultTargets['Iron'].amount} mg</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: {getProgress(nutritionData.micronutrients.iron_mg, defaultTargets['Iron'].amount)}%"></div>
-          </div>
-        </div>
-
-        <div class="micro-item">
-          <div class="micro-header">
-            <span>Potassium</span>
-            <span>{formatNumber(nutritionData.micronutrients.potassium_mg)} / {defaultTargets['Potassium'].amount} mg</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: {getProgress(nutritionData.micronutrients.potassium_mg, defaultTargets['Potassium'].amount)}%"></div>
-          </div>
-        </div>
+        {/each}
       </div>
     </div>
   {/if}
