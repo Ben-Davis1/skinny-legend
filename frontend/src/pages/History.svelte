@@ -13,7 +13,6 @@
   let error = '';
   let chartInstance = null;
   let updatingTargets = null; // Track which day is being updated
-  let expandedDay = null; // Track which day's meals are expanded
 
   onMount(() => {
     // Default to last 30 days
@@ -218,72 +217,45 @@
       <h3>Daily Breakdown (Click to see full nutrition)</h3>
       <div class="history-list">
         {#each history.slice().reverse() as day (day.date)}
-          <div class="history-item">
-            <div class="history-header" on:click={() => expandedDay = expandedDay === day.date ? null : day.date}>
-              <div class="history-date">
-                <strong>{day.date} {expandedDay === day.date ? '▼' : '▶'}</strong>
-                <div class="date-actions">
-                  <span class="view-link" on:click|stopPropagation={() => handleDayClick(day)}>
-                    Full Nutrition →
-                  </span>
-                  <button
-                    class="outline update-targets-btn"
-                    on:click={(e) => handleUpdateTargets(day, e)}
-                    disabled={updatingTargets === day.date}
-                    title="Update targets to match current profile"
-                  >
-                    {updatingTargets === day.date ? '⏳' : '🎯'}
-                  </button>
-                  <button
-                    class="danger delete-day-btn"
-                    on:click={(e) => handleDeleteDay(day, e)}
-                    title="Delete this day"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-              <div class="history-stats">
-                <span class="calorie-display {getCalorieColorClass(day.total_calories, day.calorie_goal)}">
-                  {Math.round(day.total_calories)} / {day.calorie_goal || 2000} cal
-                </span>
-                <span>•</span>
-                <span>P: {Math.round(day.macros.protein_g)}g</span>
-                <span>C: {Math.round(day.macros.carbs_g)}g</span>
-                <span>F: {Math.round(day.macros.fat_g)}g</span>
-              </div>
-              <div class="history-extras">
-                {#if day.total_water_ml > 0}
-                  <span class="water-indicator">💧 {(day.total_water_ml / 1000).toFixed(1)}L</span>
-                {/if}
-                {#if day.exercise_minutes > 0}
-                  <span class="exercise-indicator">🏃 {day.exercise_minutes} min</span>
-                {/if}
+          <div class="history-item" on:click={() => handleDayClick(day)}>
+            <div class="history-date">
+              <strong>{day.date}</strong>
+              <div class="date-actions">
+                <span class="view-link">View Details →</span>
+                <button
+                  class="outline update-targets-btn"
+                  on:click={(e) => handleUpdateTargets(day, e)}
+                  disabled={updatingTargets === day.date}
+                  title="Update targets to match current profile"
+                >
+                  {updatingTargets === day.date ? '⏳' : '🎯'} Update Targets
+                </button>
+                <button
+                  class="danger delete-day-btn"
+                  on:click={(e) => handleDeleteDay(day, e)}
+                  title="Delete this day"
+                >
+                  Delete
+                </button>
               </div>
             </div>
-
-            {#if expandedDay === day.date && day.meal_groups}
-              <div class="meals-breakdown">
-                {#each Object.entries(day.meal_groups) as [mealType, meals]}
-                  {#if meals.length > 0}
-                    <div class="meal-section-history">
-                      <div class="meal-header-history">
-                        <span class="meal-name">{mealType.charAt(0).toUpperCase() + mealType.slice(1)}</span>
-                        <span class="meal-calories-history">{Math.round(day.meal_calories[mealType])} cal</span>
-                      </div>
-                      <div class="meal-foods">
-                        {#each meals as food}
-                          <div class="food-item-history">
-                            <span class="food-name">{food.name}</span>
-                            <span class="food-cals">{Math.round(food.calories)} cal</span>
-                          </div>
-                        {/each}
-                      </div>
-                    </div>
-                  {/if}
-                {/each}
-              </div>
-            {/if}
+            <div class="history-stats">
+              <span class="calorie-display {getCalorieColorClass(day.total_calories, day.calorie_goal)}">
+                {Math.round(day.total_calories)} / {day.calorie_goal || 2000} cal
+              </span>
+              <span>•</span>
+              <span>P: {Math.round(day.macros.protein_g)}g</span>
+              <span>C: {Math.round(day.macros.carbs_g)}g</span>
+              <span>F: {Math.round(day.macros.fat_g)}g</span>
+            </div>
+            <div class="history-extras">
+              {#if day.total_water_ml > 0}
+                <span class="water-indicator">💧 {(day.total_water_ml / 1000).toFixed(1)}L</span>
+              {/if}
+              {#if day.exercise_minutes > 0}
+                <span class="exercise-indicator">🏃 {day.exercise_minutes} min</span>
+              {/if}
+            </div>
           </div>
         {/each}
       </div>
@@ -340,11 +312,8 @@
     padding: 1rem;
     background: var(--bg);
     border-radius: 4px;
-    transition: all 0.2s;
-  }
-
-  .history-header {
     cursor: pointer;
+    transition: all 0.2s;
   }
 
   .history-item:hover {
@@ -480,66 +449,6 @@
 
   .totals-grid div {
     font-size: 0.875rem;
-  }
-
-  .meals-breakdown {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 2px solid var(--border);
-  }
-
-  .meal-section-history {
-    margin-bottom: 1rem;
-  }
-
-  .meal-section-history:last-child {
-    margin-bottom: 0;
-  }
-
-  .meal-header-history {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0.75rem;
-    background: var(--primary);
-    color: white;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-  }
-
-  .meal-name {
-    font-weight: 600;
-    text-transform: capitalize;
-  }
-
-  .meal-calories-history {
-    font-weight: 600;
-  }
-
-  .meal-foods {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding-left: 0.5rem;
-  }
-
-  .food-item-history {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem;
-    background: var(--white);
-    border-radius: 4px;
-    font-size: 0.875rem;
-  }
-
-  .food-name {
-    color: var(--text);
-  }
-
-  .food-cals {
-    color: var(--text-light);
-    font-weight: 500;
   }
 
   @media (max-width: 768px) {

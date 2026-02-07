@@ -195,29 +195,6 @@
     fat: acc.fat + entry.fat_g
   }), { protein: 0, carbs: 0, fat: 0 });
 
-  // Group entries by meal type
-  $: mealGroups = (() => {
-    const groups = { breakfast: [], lunch: [], dinner: [], snack: [] };
-    entries.forEach(entry => {
-      const mealType = entry.meal_type || 'snack';
-      if (groups[mealType]) {
-        groups[mealType].push(entry);
-      } else {
-        // If meal_type is invalid, put in snack
-        groups.snack.push(entry);
-      }
-    });
-    return groups;
-  })();
-
-  // Calculate calories for each meal
-  $: mealCalories = {
-    breakfast: mealGroups.breakfast.reduce((sum, e) => sum + e.calories, 0),
-    lunch: mealGroups.lunch.reduce((sum, e) => sum + e.calories, 0),
-    dinner: mealGroups.dinner.reduce((sum, e) => sum + e.calories, 0),
-    snack: mealGroups.snack.reduce((sum, e) => sum + e.calories, 0)
-  };
-
   function getCalorieColorClass(current, goal) {
     if (!goal) return '';
     const percentage = (current / goal) * 100;
@@ -363,83 +340,76 @@
       {#if entries.length === 0}
         <p class="text-muted">No food entries yet. Add your first meal above!</p>
       {:else}
-        {#each Object.entries(mealGroups) as [mealType, mealEntries]}
-          {#if mealEntries.length > 0}
-            <div class="meal-section">
-              <div class="meal-header">
-                <h4>{mealType.charAt(0).toUpperCase() + mealType.slice(1)}</h4>
-                <span class="meal-calories">{Math.round(mealCalories[mealType])} cal</span>
-              </div>
-              <div class="entries-list">
-                {#each mealEntries as entry (entry.id)}
-                  <div class="entry-item" class:expanded={expandedEntry === entry.id}>
-                    <div class="entry-info" on:click={() => expandedEntry = expandedEntry === entry.id ? null : entry.id}>
-                      <div class="entry-name">
-                        <strong>{entry.name}</strong>
-                        <span class="expand-icon">{expandedEntry === entry.id ? '▼' : '▶'}</span>
-                      </div>
-                      <div class="entry-details text-muted">
-                        {entry.serving_size} • {entry.calories} cal •
-                        P: {entry.protein_g}g, C: {entry.carbs_g}g, F: {entry.fat_g}g
-                      </div>
+        <div class="entries-list">
+          {#each entries as entry (entry.id)}
+            <div class="entry-item" class:expanded={expandedEntry === entry.id}>
+              <div class="entry-info" on:click={() => expandedEntry = expandedEntry === entry.id ? null : entry.id}>
+                <div class="entry-name">
+                  <strong>{entry.name}</strong>
+                  {#if entry.meal_type}
+                    <span class="meal-badge">{entry.meal_type}</span>
+                  {/if}
+                  <span class="expand-icon">{expandedEntry === entry.id ? '▼' : '▶'}</span>
+                </div>
+                <div class="entry-details text-muted">
+                  {entry.serving_size} • {entry.calories} cal •
+                  P: {entry.protein_g}g, C: {entry.carbs_g}g, F: {entry.fat_g}g
+                </div>
 
-                      {#if expandedEntry === entry.id}
-                        <div class="entry-expanded">
-                          <h4>Detailed Nutrition</h4>
-                          <div class="nutrition-grid">
-                            <div class="nutrition-item">
-                              <span class="label">Protein:</span>
-                              <span class="value">{entry.protein_g}g</span>
-                            </div>
-                            <div class="nutrition-item">
-                              <span class="label">Carbs:</span>
-                              <span class="value">{entry.carbs_g}g</span>
-                            </div>
-                            <div class="nutrition-item">
-                              <span class="label">Fat:</span>
-                              <span class="value">{entry.fat_g}g</span>
-                            </div>
-                            <div class="nutrition-item">
-                              <span class="label">Fiber:</span>
-                              <span class="value">{entry.fiber_g}g</span>
-                            </div>
-                            <div class="nutrition-item">
-                              <span class="label">Sugar:</span>
-                              <span class="value">{entry.sugar_g}g</span>
-                            </div>
-                            <div class="nutrition-item">
-                              <span class="label">Serving:</span>
-                              <span class="value">{entry.serving_size}</span>
-                            </div>
-                          </div>
-                          {#if entry.ai_notes}
-                            <div class="ai-reasoning">
-                              <strong>AI Analysis:</strong>
-                              <p>{entry.ai_notes}</p>
-                            </div>
-                          {/if}
-                          {#if entry.barcode}
-                            <p class="source-info">
-                              <strong>Source:</strong> Barcode scan ({entry.barcode})
-                            </p>
-                          {/if}
-                          {#if entry.image_path && !entry.ai_notes}
-                            <p class="source-info">
-                              <strong>Source:</strong> AI image analysis
-                            </p>
-                          {/if}
-                        </div>
-                      {/if}
+                {#if expandedEntry === entry.id}
+                  <div class="entry-expanded">
+                    <h4>Detailed Nutrition</h4>
+                    <div class="nutrition-grid">
+                      <div class="nutrition-item">
+                        <span class="label">Protein:</span>
+                        <span class="value">{entry.protein_g}g</span>
+                      </div>
+                      <div class="nutrition-item">
+                        <span class="label">Carbs:</span>
+                        <span class="value">{entry.carbs_g}g</span>
+                      </div>
+                      <div class="nutrition-item">
+                        <span class="label">Fat:</span>
+                        <span class="value">{entry.fat_g}g</span>
+                      </div>
+                      <div class="nutrition-item">
+                        <span class="label">Fiber:</span>
+                        <span class="value">{entry.fiber_g}g</span>
+                      </div>
+                      <div class="nutrition-item">
+                        <span class="label">Sugar:</span>
+                        <span class="value">{entry.sugar_g}g</span>
+                      </div>
+                      <div class="nutrition-item">
+                        <span class="label">Serving:</span>
+                        <span class="value">{entry.serving_size}</span>
+                      </div>
                     </div>
-                    <button class="danger" on:click|stopPropagation={() => handleDeleteEntry(entry.id)}>
-                      Delete
-                    </button>
+                    {#if entry.ai_notes}
+                      <div class="ai-reasoning">
+                        <strong>AI Analysis:</strong>
+                        <p>{entry.ai_notes}</p>
+                      </div>
+                    {/if}
+                    {#if entry.barcode}
+                      <p class="source-info">
+                        <strong>Source:</strong> Barcode scan ({entry.barcode})
+                      </p>
+                    {/if}
+                    {#if entry.image_path && !entry.ai_notes}
+                      <p class="source-info">
+                        <strong>Source:</strong> AI image analysis
+                      </p>
+                    {/if}
                   </div>
-                {/each}
+                {/if}
               </div>
+              <button class="danger" on:click|stopPropagation={() => handleDeleteEntry(entry.id)}>
+                Delete
+              </button>
             </div>
-          {/if}
-        {/each}
+          {/each}
+        </div>
       {/if}
     </div>
   {/if}
@@ -499,36 +469,6 @@
   .stat-value.over-goal,
   .stat-value.over-target {
     color: #F44336; /* Red */
-  }
-
-  .meal-section {
-    margin-bottom: 2rem;
-  }
-
-  .meal-section:last-child {
-    margin-bottom: 0;
-  }
-
-  .meal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    background: var(--primary);
-    color: white;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-  }
-
-  .meal-header h4 {
-    margin: 0;
-    font-size: 1.125rem;
-    text-transform: capitalize;
-  }
-
-  .meal-calories {
-    font-size: 1rem;
-    font-weight: 600;
   }
 
   .entries-list {
