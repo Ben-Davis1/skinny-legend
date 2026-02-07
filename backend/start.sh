@@ -3,10 +3,20 @@
 # Create necessary directories
 mkdir -p uploads
 
+# Create data directory if using persistent disk
+if [ -n "$DATABASE_PATH" ]; then
+    DB_DIR=$(dirname "$DATABASE_PATH")
+    mkdir -p "$DB_DIR"
+    echo "Using database at: $DATABASE_PATH"
+fi
+
 # Initialize database if it doesn't exist
-if [ ! -f "skinny_legend.db" ]; then
-    echo "Initializing database..."
+DB_FILE="${DATABASE_PATH:-./skinny_legend.db}"
+if [ ! -f "$DB_FILE" ]; then
+    echo "Initializing database at $DB_FILE..."
     python3 -c "from database import init_db; init_db()"
+else
+    echo "Database already exists at $DB_FILE"
 fi
 
 # Start the application with gunicorn

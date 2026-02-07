@@ -2,7 +2,7 @@ import sqlite3
 import os
 from contextlib import contextmanager
 
-DATABASE_PATH = os.getenv('DATABASE_URL', 'sqlite:///./skinny_legend.db').replace('sqlite:///', '')
+DATABASE_PATH = os.getenv('DATABASE_PATH', './skinny_legend.db')
 
 def init_db():
     """Initialize the database with the schema"""
