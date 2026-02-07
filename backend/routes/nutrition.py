@@ -34,7 +34,7 @@ def get_nutrition_breakdown(date):
         'sugar_g': 0
     }
 
-    # Calculate micronutrient totals
+    # Calculate micronutrient totals and track sources
     micro_totals = {
         'vitamin_a_mcg': 0,
         'vitamin_c_mg': 0,
@@ -51,6 +51,9 @@ def get_nutrition_breakdown(date):
         'zinc_mg': 0,
         'sodium_mg': 0
     }
+
+    # Track sources for each micronutrient
+    micro_sources = {key: [] for key in micro_totals.keys()}
 
     for entry in food_entries:
         totals['calories'] += entry['calories']
@@ -69,7 +72,14 @@ def get_nutrition_breakdown(date):
 
         if micros:
             for key in micro_totals.keys():
-                micro_totals[key] += micros.get(key, 0)
+                amount = micros.get(key, 0)
+                if amount > 0:
+                    micro_totals[key] += amount
+                    micro_sources[key].append({
+                        'name': entry['name'],
+                        'amount': round(amount, 1),
+                        'type': 'food'
+                    })
 
     # Add micronutrients from supplements
     supplements = query_db(
@@ -83,13 +93,21 @@ def get_nutrition_breakdown(date):
                            'calcium_mg', 'iron_mg', 'potassium_mg', 'sodium_mg']
         for key in supplement_micros:
             if key in micro_totals:
-                micro_totals[key] += supplement.get(key, 0)
+                amount = supplement.get(key, 0)
+                if amount > 0:
+                    micro_totals[key] += amount
+                    micro_sources[key].append({
+                        'name': supplement['name'],
+                        'amount': round(amount, 1),
+                        'type': 'supplement'
+                    })
 
     return jsonify({
         'date': date,
         'daily_log': daily_log,
         'macros': totals,
         'micronutrients': micro_totals,
+        'micronutrient_sources': micro_sources,
         'food_entries': food_entries
     })
 

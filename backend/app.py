@@ -7,6 +7,7 @@ from database import init_db
 
 # Load environment variables
 load_dotenv()
+# Test deploy - verifying persistent disk works correctly
 
 # Create Flask app
 app = Flask(__name__)
