@@ -126,7 +126,8 @@ export const profile = {
     get: (userId = 1) => request(`/api/profile?user_id=${userId}`),
     create: (data) => request('/api/profile', { method: 'POST', body: JSON.stringify(data) }),
     update: (data) => request('/api/profile', { method: 'PUT', body: JSON.stringify(data) }),
-    getCalculations: (userId = 1) => request(`/api/profile/calculations?user_id=${userId}`)
+    getCalculations: (userId = 1) => request(`/api/profile/calculations?user_id=${userId}`),
+    updateDayTargets: (date, userId = 1) => request(`/api/profile/update-day-targets/${date}?user_id=${userId}`, { method: 'POST' })
 };
 
 // Weight Logs API

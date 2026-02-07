@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { nutrition, dailyLogs } from '../lib/api.js';
+  import { nutrition, dailyLogs, profile } from '../lib/api.js';
   import { push } from 'svelte-spa-router';
   import { Chart, registerables } from 'chart.js';
 
@@ -12,6 +12,7 @@
   let loading = false;
   let error = '';
   let chartInstance = null;
+  let updatingTargets = null; // Track which day is being updated
 
   onMount(() => {
     // Default to last 30 days
@@ -121,6 +122,24 @@
       loading = false;
     }
   }
+
+  async function handleUpdateTargets(day, event) {
+    event.stopPropagation(); // Prevent navigation
+
+    if (!confirm(`Update targets for ${day.date} to match your current profile settings?`)) {
+      return;
+    }
+
+    try {
+      updatingTargets = day.date;
+      await profile.updateDayTargets(day.date);
+      await loadHistory(); // Reload to show updated targets
+    } catch (err) {
+      error = `Failed to update targets: ${err.message}`;
+    } finally {
+      updatingTargets = null;
+    }
+  }
 </script>
 
 <div class="container">
@@ -203,6 +222,14 @@
               <strong>{day.date}</strong>
               <div class="date-actions">
                 <span class="view-link">View Details →</span>
+                <button
+                  class="outline update-targets-btn"
+                  on:click={(e) => handleUpdateTargets(day, e)}
+                  disabled={updatingTargets === day.date}
+                  title="Update targets to match current profile"
+                >
+                  {updatingTargets === day.date ? '⏳' : '🎯'} Update Targets
+                </button>
                 <button
                   class="danger delete-day-btn"
                   on:click={(e) => handleDeleteDay(day, e)}
@@ -323,6 +350,12 @@
     font-size: 0.75rem;
   }
 
+  .update-targets-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
   .history-stats {
     font-size: 0.875rem;
     color: var(--text-light);
@@ -433,7 +466,8 @@
       margin-right: 0.25rem;
     }
 
-    .delete-day-btn {
+    .delete-day-btn,
+    .update-targets-btn {
       padding: 0.5rem 0.75rem;
       font-size: 0.875rem;
     }
@@ -454,7 +488,8 @@
       gap: 0.5rem;
     }
 
-    .delete-day-btn {
+    .delete-day-btn,
+    .update-targets-btn {
       width: 100%;
     }
 

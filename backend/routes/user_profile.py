@@ -134,8 +134,59 @@ def update_profile():
         ]
     )
 
+    # Update today's daily log with new targets
+    from datetime import date
+    today = date.today().isoformat()
+    execute_db(
+        '''UPDATE daily_logs
+           SET calorie_goal = ?,
+               protein_target_g = ?,
+               carbs_target_g = ?,
+               fat_target_g = ?
+           WHERE user_id = ? AND date = ?''',
+        [calorie_goal, macros['protein_g'], macros['carbs_g'], macros['fat_g'], user_id, today]
+    )
+
     profile = query_db('SELECT * FROM user_profile WHERE user_id = ?', [user_id], one=True)
     return jsonify(profile)
+
+@bp.route('/update-day-targets/<date>', methods=['POST'])
+def update_day_targets(date):
+    """Update a specific day's targets from current profile"""
+    user_id = request.args.get('user_id', 1)
+
+    # Get current profile targets
+    profile = query_db(
+        'SELECT * FROM user_profile WHERE user_id = ?',
+        [user_id],
+        one=True
+    )
+
+    if not profile:
+        return jsonify({'error': 'Profile not found'}), 404
+
+    # Calculate calorie goal
+    calorie_goal = calculate_calorie_goal(profile['tdee'], profile['goal'])
+
+    # Update the daily log for this date
+    execute_db(
+        '''UPDATE daily_logs
+           SET calorie_goal = ?,
+               protein_target_g = ?,
+               carbs_target_g = ?,
+               fat_target_g = ?
+           WHERE user_id = ? AND date = ?''',
+        [
+            calorie_goal,
+            profile['protein_target_g'],
+            profile['carbs_target_g'],
+            profile['fat_target_g'],
+            user_id,
+            date
+        ]
+    )
+
+    return jsonify({'message': 'Targets updated successfully', 'date': date})
 
 @bp.route('/calculations', methods=['GET'])
 def get_calculations():
