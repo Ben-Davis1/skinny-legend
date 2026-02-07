@@ -144,8 +144,7 @@ CREATE TABLE IF NOT EXISTS weight_logs (
     weight_kg REAL NOT NULL,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    UNIQUE(user_id, date)
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 -- Exercises table

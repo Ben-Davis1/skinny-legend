@@ -169,10 +169,10 @@ def update_profile():
         [calorie_goal, macros['protein_g'], macros['carbs_g'], macros['fat_g'], user_id, today]
     )
 
-    # Always update today's weight log when profile is saved
+    # Create a new weight log entry for every profile save
     new_weight = data['weight_kg']
     execute_db(
-        '''INSERT OR REPLACE INTO weight_logs (user_id, date, weight_kg, notes)
+        '''INSERT INTO weight_logs (user_id, date, weight_kg, notes)
            VALUES (?, ?, ?, ?)''',
         [user_id, today, new_weight, 'Updated from profile']
     )
