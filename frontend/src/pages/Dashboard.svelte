@@ -315,31 +315,33 @@
           </div>
         </div>
 
-        <WaterTracker
-          totalWaterMl={dailyLog.total_water_ml}
-          waterTarget={waterTarget}
-          on:update={handleWaterUpdate}
-        />
+        <div class="trackers-section">
+          <WaterTracker
+            totalWaterMl={dailyLog.total_water_ml}
+            waterTarget={waterTarget}
+            on:update={handleWaterUpdate}
+          />
 
-        <ExerciseLogger
-          dailyLogId={dailyLog.id}
-          on:update={loadTodayLog}
-        />
+          <ExerciseLogger
+            dailyLogId={dailyLog.id}
+            on:update={loadTodayLog}
+          />
 
-        <WorkoutTracker
-          dailyLogId={dailyLog.id}
-          on:update={loadTodayLog}
-        />
+          <WorkoutTracker
+            dailyLogId={dailyLog.id}
+            on:update={loadTodayLog}
+          />
 
-        <SupplementLogger
-          dailyLogId={dailyLog.id}
-          on:update={loadTodayLog}
-        />
+          <SupplementLogger
+            dailyLogId={dailyLog.id}
+            on:update={loadTodayLog}
+          />
 
-        <RecentSupplements
-          dailyLogId={dailyLog.id}
-          on:update={loadTodayLog}
-        />
+          <RecentSupplements
+            dailyLogId={dailyLog.id}
+            on:update={loadTodayLog}
+          />
+        </div>
       </div>
     </div>
 
@@ -663,16 +665,16 @@
       order: 2;
     }
 
+    .trackers-section {
+      order: 3;
+    }
+
     .left-column {
       order: 4;
     }
 
     .right-column {
       display: contents;
-    }
-
-    .right-column > *:not(.daily-summary) {
-      order: 3;
     }
   }
 </style>
