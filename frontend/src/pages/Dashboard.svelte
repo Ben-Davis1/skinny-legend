@@ -228,8 +228,8 @@
   {#if loading}
     <div class="loading">Loading...</div>
   {:else if dailyLog}
-    <div class="grid grid-2">
-      <div>
+    <div class="grid grid-2 dashboard-grid">
+      <div class="left-column">
         <FoodEntry
           dailyLogId={dailyLog.id}
           on:save={handleSaveEntry}
@@ -285,8 +285,8 @@
         {/if}
       </div>
 
-      <div>
-        <div class="card summary">
+      <div class="right-column">
+        <div class="card summary daily-summary">
           <h3>Daily Summary</h3>
           <div class="stat">
             <span class="stat-label">Total Calories</span>
@@ -342,7 +342,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card food-entries-section">
       <h3>Food Entries ({entries.length})</h3>
       {#if entries.length === 0}
         <p class="text-muted">No food entries yet. Add your first meal above!</p>
@@ -641,6 +641,28 @@
     .product-actions {
       width: 100%;
       min-width: auto;
+    }
+
+    /* Mobile reordering: Calorie summary first, then food entries, then everything else */
+    .dashboard-grid {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .daily-summary {
+      order: 1;
+    }
+
+    .food-entries-section {
+      order: 2;
+    }
+
+    .left-column {
+      order: 3;
+    }
+
+    .right-column > *:not(.daily-summary) {
+      order: 4;
     }
   }
 </style>

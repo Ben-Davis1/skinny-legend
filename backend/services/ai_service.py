@@ -92,9 +92,16 @@ Return ONLY this JSON structure with your estimates:
                 "vitamin_a_mcg": 0,
                 "vitamin_c_mg": 0,
                 "vitamin_d_mcg": 0,
+                "vitamin_e_mg": 0,
+                "vitamin_k_mcg": 0,
+                "vitamin_b6_mg": 0,
+                "vitamin_b12_mcg": 0,
+                "folate_mcg": 0,
                 "calcium_mg": 0,
                 "iron_mg": 0,
+                "magnesium_mg": 0,
                 "potassium_mg": 0,
+                "zinc_mg": 0,
                 "sodium_mg": 0
             }
         }
@@ -375,9 +382,16 @@ Provide realistic micronutrient estimates in this exact JSON format:
     "vitamin_a_mcg": 0,
     "vitamin_c_mg": 0,
     "vitamin_d_mcg": 0,
+    "vitamin_e_mg": 0,
+    "vitamin_k_mcg": 0,
+    "vitamin_b6_mg": 0,
+    "vitamin_b12_mcg": 0,
+    "folate_mcg": 0,
     "calcium_mg": 0,
     "iron_mg": 0,
+    "magnesium_mg": 0,
     "potassium_mg": 0,
+    "zinc_mg": 0,
     "sodium_mg": 0
 }}
 
@@ -412,9 +426,16 @@ Use your knowledge of typical micronutrient content for this food. If the food t
             "vitamin_a_mcg": 0,
             "vitamin_c_mg": 0,
             "vitamin_d_mcg": 0,
+            "vitamin_e_mg": 0,
+            "vitamin_k_mcg": 0,
+            "vitamin_b6_mg": 0,
+            "vitamin_b12_mcg": 0,
+            "folate_mcg": 0,
             "calcium_mg": 0,
             "iron_mg": 0,
+            "magnesium_mg": 0,
             "potassium_mg": 0,
+            "zinc_mg": 0,
             "sodium_mg": 0
         }
 
@@ -438,9 +459,16 @@ Provide the micronutrient amounts in this exact JSON format:
     "vitamin_a_mcg": 0,
     "vitamin_c_mg": 0,
     "vitamin_d_mcg": 0,
+    "vitamin_e_mg": 0,
+    "vitamin_k_mcg": 0,
+    "vitamin_b6_mg": 0,
+    "vitamin_b12_mcg": 0,
+    "folate_mcg": 0,
     "calcium_mg": 0,
     "iron_mg": 0,
+    "magnesium_mg": 0,
     "potassium_mg": 0,
+    "zinc_mg": 0,
     "sodium_mg": 0
 }}
 
@@ -474,8 +502,15 @@ Only include amounts for nutrients this supplement actually provides. Use 0 for 
             "vitamin_a_mcg": 0,
             "vitamin_c_mg": 0,
             "vitamin_d_mcg": 0,
+            "vitamin_e_mg": 0,
+            "vitamin_k_mcg": 0,
+            "vitamin_b6_mg": 0,
+            "vitamin_b12_mcg": 0,
+            "folate_mcg": 0,
             "calcium_mg": 0,
             "iron_mg": 0,
+            "magnesium_mg": 0,
             "potassium_mg": 0,
+            "zinc_mg": 0,
             "sodium_mg": 0
         }
