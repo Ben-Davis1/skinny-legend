@@ -165,7 +165,6 @@
     <input
       type="file"
       accept="image/*"
-      capture="environment"
       multiple
       on:change={handleFileUpload}
     />
