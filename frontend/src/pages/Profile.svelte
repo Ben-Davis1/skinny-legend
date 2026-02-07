@@ -13,11 +13,6 @@
   let editMode = false;
   let weightHistory = [];
   let weightChartInstance = null;
-  let newWeight = {
-    date: new Date().toISOString().split('T')[0],
-    weight_kg: 70,
-    notes: ''
-  };
 
   let formData = {
     age: 30,
@@ -166,19 +161,6 @@
         }
       }
     });
-  }
-
-  async function handleAddWeight() {
-    try {
-      error = '';
-      success = '';
-      await weightLogs.create(newWeight);
-      await loadWeightHistory();
-      success = 'Weight logged successfully!';
-      newWeight.notes = '';
-    } catch (err) {
-      error = err.message;
-    }
   }
 
   async function handleDeleteWeight(id) {
@@ -534,43 +516,11 @@
     <!-- Weight Tracking Section -->
     <div class="card">
       <h2>Weight Tracking</h2>
+      <p class="info-banner">
+        💡 Weight is automatically logged when you update your profile above. Your weight history is tracked automatically!
+      </p>
 
-      <div class="grid grid-2">
-        <div>
-          <h3>Log Weight</h3>
-          <div class="form-group">
-            <label for="weight-date">Date</label>
-            <input
-              id="weight-date"
-              type="date"
-              bind:value={newWeight.date}
-            />
-          </div>
-          <div class="form-group">
-            <label for="weight-value">Weight (kg)</label>
-            <input
-              id="weight-value"
-              type="number"
-              bind:value={newWeight.weight_kg}
-              min="1"
-              step="0.1"
-            />
-          </div>
-          <div class="form-group">
-            <label for="weight-notes">Notes (optional)</label>
-            <input
-              id="weight-notes"
-              type="text"
-              bind:value={newWeight.notes}
-              placeholder="e.g., Morning, before breakfast"
-            />
-          </div>
-          <button class="primary" on:click={handleAddWeight}>
-            Log Weight
-          </button>
-        </div>
-
-        <div>
+      <div>
           <h3>Recent Entries</h3>
           {#if weightHistory.length === 0}
             <p class="text-muted">No weight entries yet. Start tracking!</p>
@@ -608,6 +558,15 @@
 </div>
 
 <style>
+  .info-banner {
+    padding: 1rem;
+    background: #e3f2fd;
+    border-left: 4px solid #2196F3;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    color: #1976D2;
+  }
+
   .form-group {
     margin-bottom: 1rem;
   }
