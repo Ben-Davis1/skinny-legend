@@ -169,14 +169,13 @@ def update_profile():
         [calorie_goal, macros['protein_g'], macros['carbs_g'], macros['fat_g'], user_id, today]
     )
 
-    # Auto-create weight log if weight changed
+    # Always update today's weight log when profile is saved
     new_weight = data['weight_kg']
-    if current_profile and current_profile['weight_kg'] != new_weight:
-        execute_db(
-            '''INSERT OR REPLACE INTO weight_logs (user_id, date, weight_kg, notes)
-               VALUES (?, ?, ?, ?)''',
-            [user_id, today, new_weight, 'Updated from profile']
-        )
+    execute_db(
+        '''INSERT OR REPLACE INTO weight_logs (user_id, date, weight_kg, notes)
+           VALUES (?, ?, ?, ?)''',
+        [user_id, today, new_weight, 'Updated from profile']
+    )
 
     # Update vitamin targets if age or gender changed
     if not current_profile or current_profile['age'] != data['age'] or current_profile['gender'] != data['gender']:
