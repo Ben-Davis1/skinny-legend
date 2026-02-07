@@ -184,6 +184,16 @@ def get_nutrition_history():
             'fiber_g': sum(e['fiber_g'] for e in food_entries)
         }
 
+        # Group entries by meal type and calculate meal calories
+        meal_groups = {'breakfast': [], 'lunch': [], 'dinner': [], 'snack': []}
+        meal_calories = {'breakfast': 0, 'lunch': 0, 'dinner': 0, 'snack': 0}
+
+        for entry in food_entries:
+            meal_type = entry.get('meal_type', 'snack')
+            if meal_type in meal_groups:
+                meal_groups[meal_type].append(entry)
+                meal_calories[meal_type] += entry['calories']
+
         history.append({
             'date': log['date'],
             'total_calories': log['total_calories'],
@@ -191,7 +201,9 @@ def get_nutrition_history():
             'total_water_ml': log['total_water_ml'],
             'exercise_minutes': log['exercise_minutes'],
             'macros': macro_totals,
-            'entry_count': len(food_entries)
+            'entry_count': len(food_entries),
+            'meal_groups': meal_groups,
+            'meal_calories': meal_calories
         })
 
     return jsonify(history)
