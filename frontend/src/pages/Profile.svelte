@@ -543,7 +543,6 @@
             </div>
           {/if}
         </div>
-      </div>
 
       {#if weightHistory.length > 0}
         <div class="weight-chart-container">
