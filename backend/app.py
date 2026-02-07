@@ -17,7 +17,7 @@ allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173').split(',
 CORS(app, origins=allowed_origins)
 
 # Import routes
-from routes import daily_logs, food_entries, barcode, images, ai_analysis, chat, nutrition, user_profile, weight_logs, exercises, supplements
+from routes import daily_logs, food_entries, barcode, images, ai_analysis, chat, nutrition, user_profile, weight_logs, exercises, supplements, workouts
 
 # Register blueprints
 app.register_blueprint(daily_logs.bp)
@@ -31,6 +31,7 @@ app.register_blueprint(user_profile.bp)
 app.register_blueprint(weight_logs.bp)
 app.register_blueprint(exercises.bp)
 app.register_blueprint(supplements.bp)
+app.register_blueprint(workouts.bp)
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])

@@ -1,15 +1,17 @@
 <script>
   import { onMount } from 'svelte';
-  import { nutrition } from '../lib/api.js';
+  import { nutrition, workouts } from '../lib/api.js';
   import { push } from 'svelte-spa-router';
 
   export let params = {};
 
   let selectedDay = params.date || new Date().toISOString().split('T')[0];
   let nutritionData = null;
+  let workoutData = [];
   let loading = false;
   let error = '';
   let expandedMicro = null; // Track which micronutrient is expanded
+  let expandedWorkout = {}; // Track which workouts are expanded
 
   $: if (params.date) {
     selectedDay = params.date;
@@ -42,11 +44,17 @@
       loading = true;
       error = '';
       nutritionData = await nutrition.getBreakdown(selectedDay);
+      workoutData = await workouts.getByDate(selectedDay);
     } catch (err) {
       error = err.message;
     } finally {
       loading = false;
     }
+  }
+
+  function toggleWorkout(sessionId) {
+    expandedWorkout[sessionId] = !expandedWorkout[sessionId];
+    expandedWorkout = { ...expandedWorkout };
   }
 
   function getProgress(current, target) {
@@ -94,6 +102,55 @@
         </div>
       </div>
     </div>
+
+    <!-- Workouts Section -->
+    {#if workoutData && workoutData.length > 0}
+      <div class="card">
+        <h3>💪 Strength Training</h3>
+        <div class="workouts-list">
+          {#each workoutData as session}
+            <div class="workout-session">
+              <button class="workout-header" on:click={() => toggleWorkout(session.id)}>
+                <div class="workout-title">
+                  <strong>{session.name}</strong>
+                  <span class="workout-summary">
+                    {session.exercises?.length || 0} exercises •
+                    {session.exercises?.reduce((sum, ex) => sum + (ex.sets?.length || 0), 0) || 0} sets
+                  </span>
+                </div>
+                <span class="expand-icon">{expandedWorkout[session.id] ? '▼' : '▶'}</span>
+              </button>
+
+              {#if expandedWorkout[session.id]}
+                <div class="workout-details">
+                  {#each session.exercises as exercise}
+                    <div class="exercise-detail">
+                      <h5>{exercise.exercise_name}</h5>
+                      {#if exercise.exercise_category}
+                        <span class="category-badge">{exercise.exercise_category}</span>
+                      {/if}
+                      <div class="sets-list">
+                        {#each exercise.sets as set}
+                          <div class="set-item">
+                            <span class="set-number">Set {set.set_number}</span>
+                            <span class="set-info">
+                              {set.reps} reps × {set.weight_kg}kg
+                              {#if set.rpe}
+                                • RPE {set.rpe}
+                              {/if}
+                            </span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
 
     <div class="grid grid-2">
       <div class="card">
@@ -445,6 +502,107 @@
     .flex-between button {
       width: 100%;
     }
+  }
+
+  /* Workouts Section */
+  .workouts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .workout-session {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .workout-header {
+    width: 100%;
+    padding: 1rem;
+    background: var(--bg);
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .workout-header:hover {
+    background: #e8e8e8;
+  }
+
+  .workout-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .workout-summary {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: normal;
+  }
+
+  .expand-icon {
+    color: var(--primary);
+    font-size: 0.9rem;
+  }
+
+  .workout-details {
+    padding: 1rem;
+    background: white;
+    border-top: 1px solid var(--border);
+  }
+
+  .exercise-detail {
+    margin-bottom: 1.5rem;
+  }
+
+  .exercise-detail:last-child {
+    margin-bottom: 0;
+  }
+
+  .exercise-detail h5 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    display: inline-block;
+  }
+
+  .category-badge {
+    background: var(--secondary);
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+  }
+
+  .sets-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .set-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: var(--bg);
+    border-radius: 4px;
+  }
+
+  .set-number {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .set-info {
+    color: var(--text-light);
   }
 
   @media (max-width: 480px) {

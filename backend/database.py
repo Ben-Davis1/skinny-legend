@@ -59,6 +59,30 @@ def migrate_db(conn):
         print(f"Migration error (safe to ignore if first run): {e}")
         conn.rollback()
 
+    # Migration: Add workout tracking tables
+    migrate_workout_tables(conn)
+
+def migrate_workout_tables(conn):
+    """Add workout tracking tables"""
+    cursor = conn.cursor()
+
+    try:
+        # Check if workout_sessions table exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='workout_sessions'")
+        if not cursor.fetchone():
+            print("Creating workout tracking tables...")
+
+            # Read and execute new schema additions
+            with open('schema.sql', 'r') as f:
+                schema = f.read()
+                conn.executescript(schema)
+
+            print("Workout tables created successfully!")
+            conn.commit()
+    except Exception as e:
+        print(f"Workout table migration error: {e}")
+        conn.rollback()
+
 @contextmanager
 def get_db():
     """Context manager for database connections"""

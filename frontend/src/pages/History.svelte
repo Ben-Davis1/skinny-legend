@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { nutrition, dailyLogs, profile } from '../lib/api.js';
+  import { nutrition, dailyLogs, profile, workouts } from '../lib/api.js';
   import { push } from 'svelte-spa-router';
   import { Chart, registerables } from 'chart.js';
 
@@ -9,6 +9,7 @@
   let startDate = '';
   let endDate = '';
   let history = [];
+  let workoutSummaries = {};
   let loading = false;
   let error = '';
   let chartInstance = null;
@@ -33,6 +34,14 @@
       loading = true;
       error = '';
       history = await nutrition.getHistory(startDate, endDate);
+
+      // Load workout summaries
+      const summaries = await workouts.getDailySummary(startDate, endDate);
+      workoutSummaries = summaries.reduce((acc, summary) => {
+        acc[summary.date] = summary;
+        return acc;
+      }, {});
+
       renderChart();
     } catch (err) {
       error = err.message;
@@ -255,6 +264,16 @@
               {#if day.exercise_minutes > 0}
                 <span class="exercise-indicator">🏃 {day.exercise_minutes} min</span>
               {/if}
+              {#if workoutSummaries[day.date]}
+                <span class="workout-indicator">
+                  💪 {workoutSummaries[day.date].workout_count} workout{workoutSummaries[day.date].workout_count > 1 ? 's' : ''} •
+                  {workoutSummaries[day.date].total_exercises} exercises •
+                  {workoutSummaries[day.date].total_sets} sets
+                  {#if workoutSummaries[day.date].total_volume > 0}
+                    • {Math.round(workoutSummaries[day.date].total_volume)}kg volume
+                  {/if}
+                </span>
+              {/if}
             </div>
           </div>
         {/each}
@@ -391,6 +410,11 @@
 
   .exercise-indicator {
     color: #FF9800;
+    font-weight: 500;
+  }
+
+  .workout-indicator {
+    color: #4CAF50;
     font-weight: 500;
   }
 

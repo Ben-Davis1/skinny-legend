@@ -165,3 +165,57 @@ export const supplements = {
     update: (id, data) => request(`/api/supplements/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id) => request(`/api/supplements/${id}`, { method: 'DELETE' })
 };
+
+// Workouts API
+export const workouts = {
+    // Sessions
+    createSession: (data) => request('/api/workouts/sessions', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    }),
+    getSessions: (dailyLogId) => request(`/api/workouts/sessions/${dailyLogId}`),
+    updateSession: (sessionId, data) => request(`/api/workouts/sessions/${sessionId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+    }),
+    deleteSession: (sessionId) => request(`/api/workouts/sessions/${sessionId}`, {
+        method: 'DELETE'
+    }),
+    getSessionDetails: (sessionId) => request(`/api/workouts/session-details/${sessionId}`),
+
+    // Exercises
+    createExercise: (data) => request('/api/workouts/exercises', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    }),
+    getExercises: (sessionId) => request(`/api/workouts/exercises/${sessionId}`),
+    deleteExercise: (exerciseId) => request(`/api/workouts/exercises/${exerciseId}`, {
+        method: 'DELETE'
+    }),
+
+    // Sets
+    createSet: (data) => request('/api/workouts/sets', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    }),
+    getSets: (exerciseId) => request(`/api/workouts/sets/${exerciseId}`),
+    updateSet: (setId, data) => request(`/api/workouts/sets/${setId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+    }),
+    deleteSet: (setId) => request(`/api/workouts/sets/${setId}`, {
+        method: 'DELETE'
+    }),
+
+    // History & Analytics
+    getHistory: (exerciseName, userId = 1, limit = 10) =>
+        request(`/api/workouts/history/${encodeURIComponent(exerciseName)}?user_id=${userId}&limit=${limit}`),
+    getStats: (exerciseName, userId = 1) =>
+        request(`/api/workouts/stats/${encodeURIComponent(exerciseName)}?user_id=${userId}`),
+    getRecentExercises: (userId = 1, limit = 15) =>
+        request(`/api/workouts/recent-exercises?user_id=${userId}&limit=${limit}`),
+    getDailySummary: (startDate, endDate, userId = 1) =>
+        request(`/api/workouts/daily-summary?user_id=${userId}&start_date=${startDate}&end_date=${endDate}`),
+    getByDate: (date, userId = 1) =>
+        request(`/api/workouts/by-date/${date}?user_id=${userId}`)
+};

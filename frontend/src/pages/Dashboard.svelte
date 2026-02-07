@@ -9,6 +9,8 @@
   import ExerciseLogger from '../components/ExerciseLogger.svelte';
   import SupplementLogger from '../components/SupplementLogger.svelte';
   import RecentSupplements from '../components/RecentSupplements.svelte';
+  import WorkoutTracker from '../components/WorkoutTracker.svelte';
+  import RecentWorkouts from '../components/RecentWorkouts.svelte';
 
   let currentDate;
   selectedDate.subscribe(value => {
@@ -319,6 +321,11 @@
         />
 
         <ExerciseLogger
+          dailyLogId={dailyLog.id}
+          on:update={loadTodayLog}
+        />
+
+        <WorkoutTracker
           dailyLogId={dailyLog.id}
           on:update={loadTodayLog}
         />

@@ -158,6 +158,43 @@ CREATE TABLE IF NOT EXISTS exercises (
     FOREIGN KEY (daily_log_id) REFERENCES daily_logs (id) ON DELETE CASCADE
 );
 
+-- Workout sessions (one per day, can have multiple)
+CREATE TABLE IF NOT EXISTS workout_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    daily_log_id INTEGER NOT NULL,
+    name TEXT,
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    notes TEXT,
+    FOREIGN KEY (daily_log_id) REFERENCES daily_logs (id) ON DELETE CASCADE
+);
+
+-- Individual exercises within a workout
+CREATE TABLE IF NOT EXISTS workout_exercises (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    workout_session_id INTEGER NOT NULL,
+    exercise_name TEXT NOT NULL,
+    exercise_category TEXT,
+    order_index INTEGER DEFAULT 0,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (workout_session_id) REFERENCES workout_sessions (id) ON DELETE CASCADE
+);
+
+-- Individual sets for each exercise
+CREATE TABLE IF NOT EXISTS workout_sets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    workout_exercise_id INTEGER NOT NULL,
+    set_number INTEGER NOT NULL,
+    reps INTEGER NOT NULL,
+    weight_kg REAL,
+    rpe INTEGER,
+    completed BOOLEAN DEFAULT TRUE,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (workout_exercise_id) REFERENCES workout_exercises (id) ON DELETE CASCADE
+);
+
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_daily_logs_date ON daily_logs(date);
 CREATE INDEX IF NOT EXISTS idx_daily_logs_user_id ON daily_logs(user_id);
@@ -166,3 +203,7 @@ CREATE INDEX IF NOT EXISTS idx_saved_images_user_id ON saved_images(user_id);
 CREATE INDEX IF NOT EXISTS idx_supplements_daily_log_id ON supplements(daily_log_id);
 CREATE INDEX IF NOT EXISTS idx_weight_logs_user_date ON weight_logs(user_id, date);
 CREATE INDEX IF NOT EXISTS idx_exercises_daily_log_id ON exercises(daily_log_id);
+CREATE INDEX IF NOT EXISTS idx_workout_sessions_daily_log_id ON workout_sessions(daily_log_id);
+CREATE INDEX IF NOT EXISTS idx_workout_exercises_session_id ON workout_exercises(workout_session_id);
+CREATE INDEX IF NOT EXISTS idx_workout_exercises_name ON workout_exercises(exercise_name);
+CREATE INDEX IF NOT EXISTS idx_workout_sets_exercise_id ON workout_sets(workout_exercise_id);
