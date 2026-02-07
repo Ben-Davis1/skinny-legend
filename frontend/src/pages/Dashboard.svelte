@@ -196,12 +196,19 @@
   }), { protein: 0, carbs: 0, fat: 0 });
 
   // Group entries by meal type
-  $: mealGroups = {
-    breakfast: entries.filter(e => e.meal_type === 'breakfast'),
-    lunch: entries.filter(e => e.meal_type === 'lunch'),
-    dinner: entries.filter(e => e.meal_type === 'dinner'),
-    snack: entries.filter(e => e.meal_type === 'snack')
-  };
+  $: mealGroups = (() => {
+    const groups = { breakfast: [], lunch: [], dinner: [], snack: [] };
+    entries.forEach(entry => {
+      const mealType = entry.meal_type || 'snack';
+      if (groups[mealType]) {
+        groups[mealType].push(entry);
+      } else {
+        // If meal_type is invalid, put in snack
+        groups.snack.push(entry);
+      }
+    });
+    return groups;
+  })();
 
   // Calculate calories for each meal
   $: mealCalories = {
