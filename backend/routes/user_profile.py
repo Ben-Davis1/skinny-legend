@@ -171,11 +171,20 @@ def update_profile():
 
     # Create a new weight log entry for every profile save
     new_weight = data['weight_kg']
-    execute_db(
-        '''INSERT INTO weight_logs (user_id, date, weight_kg, notes)
-           VALUES (?, ?, ?, ?)''',
-        [user_id, today, new_weight, 'Updated from profile']
-    )
+    try:
+        execute_db(
+            '''INSERT INTO weight_logs (user_id, date, weight_kg, notes)
+               VALUES (?, ?, ?, ?)''',
+            [user_id, today, new_weight, 'Updated from profile']
+        )
+    except Exception as e:
+        # If UNIQUE constraint exists (migration not run yet), use INSERT OR REPLACE as fallback
+        print(f"Weight log insert failed (using fallback): {e}")
+        execute_db(
+            '''INSERT OR REPLACE INTO weight_logs (user_id, date, weight_kg, notes)
+               VALUES (?, ?, ?, ?)''',
+            [user_id, today, new_weight, 'Updated from profile']
+        )
 
     # Update vitamin targets if age or gender changed
     if not current_profile or current_profile['age'] != data['age'] or current_profile['gender'] != data['gender']:
