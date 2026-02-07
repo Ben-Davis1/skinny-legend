@@ -136,9 +136,34 @@ CREATE TABLE IF NOT EXISTS supplements (
     FOREIGN KEY (daily_log_id) REFERENCES daily_logs (id) ON DELETE CASCADE
 );
 
+-- Weight logs table
+CREATE TABLE IF NOT EXISTS weight_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    date DATE NOT NULL,
+    weight_kg REAL NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    UNIQUE(user_id, date)
+);
+
+-- Exercises table
+CREATE TABLE IF NOT EXISTS exercises (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    daily_log_id INTEGER NOT NULL,
+    exercise_type TEXT NOT NULL,
+    duration_minutes INTEGER NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (daily_log_id) REFERENCES daily_logs (id) ON DELETE CASCADE
+);
+
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_daily_logs_date ON daily_logs(date);
 CREATE INDEX IF NOT EXISTS idx_daily_logs_user_id ON daily_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_food_entries_daily_log_id ON food_entries(daily_log_id);
 CREATE INDEX IF NOT EXISTS idx_saved_images_user_id ON saved_images(user_id);
 CREATE INDEX IF NOT EXISTS idx_supplements_daily_log_id ON supplements(daily_log_id);
+CREATE INDEX IF NOT EXISTS idx_weight_logs_user_date ON weight_logs(user_id, date);
+CREATE INDEX IF NOT EXISTS idx_exercises_daily_log_id ON exercises(daily_log_id);

@@ -82,6 +82,13 @@ def update_profile():
     data = request.json
     user_id = data.get('user_id', 1)
 
+    # Get current profile to check if weight changed
+    current_profile = query_db(
+        'SELECT * FROM user_profile WHERE user_id = ?',
+        [user_id],
+        one=True
+    )
+
     # Recalculate BMR, TDEE, and macro targets
     bmr = calculate_bmr(
         data['weight_kg'],
@@ -146,6 +153,15 @@ def update_profile():
            WHERE user_id = ? AND date = ?''',
         [calorie_goal, macros['protein_g'], macros['carbs_g'], macros['fat_g'], user_id, today]
     )
+
+    # Auto-create weight log if weight changed
+    new_weight = data['weight_kg']
+    if current_profile and current_profile['weight_kg'] != new_weight:
+        execute_db(
+            '''INSERT OR REPLACE INTO weight_logs (user_id, date, weight_kg, notes)
+               VALUES (?, ?, ?, ?)''',
+            [user_id, today, new_weight, 'Updated from profile']
+        )
 
     profile = query_db('SELECT * FROM user_profile WHERE user_id = ?', [user_id], one=True)
     return jsonify(profile)
