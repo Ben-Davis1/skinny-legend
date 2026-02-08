@@ -152,6 +152,56 @@
       error = `Failed to add food: ${err.message}`;
     }
   }
+
+  async function handleAddAll() {
+    if (!currentLog) {
+      error = 'Could not load daily log';
+      return;
+    }
+
+    if (!analysisResult || !analysisResult.items || analysisResult.items.length === 0) {
+      return;
+    }
+
+    try {
+      analyzing = true;
+      error = '';
+
+      // Build AI notes once for all items
+      const aiNotes = `AI Analysis (Confidence: ${analysisResult.confidence})${analysisResult.notes ? '\n' + analysisResult.notes : ''}${analysisResult.is_cached ? '\n(Loaded from previous analysis)' : ''}`;
+
+      // Add all items
+      for (let index = 0; index < analysisResult.items.length; index++) {
+        const item = analysisResult.items[index];
+        const multiplier = itemServingMultipliers[index] || 1;
+        const adjustedItem = calculateAdjustedNutrition(item, multiplier);
+        const mealType = itemMealTypes[index] || 'snack';
+
+        await foodEntries.create({
+          daily_log_id: currentLog.id,
+          name: adjustedItem.name,
+          calories: adjustedItem.calories,
+          protein_g: adjustedItem.protein_g,
+          carbs_g: adjustedItem.carbs_g,
+          fat_g: adjustedItem.fat_g,
+          fiber_g: adjustedItem.fiber_g || 0,
+          sugar_g: adjustedItem.sugar_g || 0,
+          serving_size: adjustedItem.serving_size,
+          meal_type: mealType,
+          image_path: selectedImageId,
+          ai_notes: aiNotes,
+          micronutrients: adjustedItem.micronutrients
+        });
+      }
+
+      analysisResult = null;
+      analyzing = false;
+      error = '';
+    } catch (err) {
+      error = `Failed to add all items: ${err.message}`;
+      analyzing = false;
+    }
+  }
 </script>
 
 <div class="container">
@@ -192,11 +242,16 @@
             {/if}
           </p>
         </div>
-        {#if analysisResult.is_cached}
-          <button class="outline" on:click={() => handleAnalyze(selectedImageId, true)}>
-            Re-analyze
+        <div class="analysis-actions">
+          <button class="primary" on:click={handleAddAll} disabled={analyzing}>
+            Add All ({analysisResult.items?.length || 0} items)
           </button>
-        {/if}
+          {#if analysisResult.is_cached}
+            <button class="outline" on:click={() => handleAnalyze(selectedImageId, true)}>
+              Re-analyze
+            </button>
+          {/if}
+        </div>
       </div>
 
       {#if analysisResult.notes}
@@ -515,5 +570,16 @@
     .serving-control {
       justify-content: space-between;
     }
+
+    .analysis-actions {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  .analysis-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
   }
 </style>
