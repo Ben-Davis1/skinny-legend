@@ -118,9 +118,9 @@ Replace the 0 values with your estimates. Be as accurate as possible."""
             "text": prompt
         })
 
-        # Call Claude API (using latest Haiku - most cost-efficient)
+        # Call Claude API (using Sonnet 4.5)
         message = client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model="claude-sonnet-4-5-20250929",
             max_tokens=2048,
             messages=[
                 {
@@ -398,7 +398,7 @@ Provide realistic micronutrient estimates in this exact JSON format:
 Use your knowledge of typical micronutrient content for this food. If the food typically has none of a nutrient, use 0."""
 
         message = client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model="claude-sonnet-4-5-20250929",
             max_tokens=512,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -475,7 +475,7 @@ Provide the micronutrient amounts in this exact JSON format:
 Only include amounts for nutrients this supplement actually provides. Use 0 for nutrients it doesn't provide."""
 
         message = client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model="claude-sonnet-4-5-20250929",
             max_tokens=512,
             messages=[{"role": "user", "content": prompt}]
         )
